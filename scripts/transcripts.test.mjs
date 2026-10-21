@@ -122,6 +122,16 @@ describe("list", () => {
     assert.deepEqual(ids, ["sess-new", "sess-mid", "sess-old"]);
   });
 
+  test("labels the session time as UTC whatever the local timezone", () => {
+    const f = fixture();
+    const at = new Date(Date.now() - DAY);
+    at.setUTCHours(14, 3, 0, 0);
+    writeSession(f.projectDir, "sess-utc", [prompt("hello")], { mtime: at.getTime() });
+    const { status, stdout } = run(f.home, f.args("list"), { TZ: "America/Los_Angeles" });
+    assert.equal(status, 0);
+    assert.equal(stdout.trim().split("\n")[1], `${at.toISOString().slice(0, 10)} 14:03 UTC  sess-utc  1 prompts  hello`);
+  });
+
   test("counts only real prompts and shows the last ai-title", () => {
     const f = fixture();
     writeSession(f.projectDir, "sess-a", [

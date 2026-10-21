@@ -126,6 +126,15 @@ describe("dir", () => {
     assert.equal(stdout.trim(), join(config, "caf\u00e9", "projects", "-w-caf-"));
   });
 
+  test("NFC-normalizes an existing workspace whose name is stored decomposed", () => {
+    const home = tempDir();
+    const parent = realpathSync(tempDir());
+    mkdirSync(join(parent, "café"));
+    const { status, stdout } = run(home, ["dir", join(parent, "café")]);
+    assert.equal(status, 0);
+    assert.equal(stdout.trim(), join(home, ".claude", "projects", `${parent}/café`.replace(/[^a-zA-Z0-9]/g, "-")));
+  });
+
   test("CLAUDE_CONFIG_DIR replaces ~/.claude", () => {
     const home = tempDir();
     const config = tempDir();

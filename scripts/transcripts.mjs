@@ -6,7 +6,7 @@
 
 import { existsSync, readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { homedir } from "node:os";
-import { basename, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
 const usage = "usage: transcripts.mjs dir [workspace] | list [--days n] [--grep text] [--subagents] | show <session-id|file> [--grep text] [--results] [--max-chars n], each with optional --workspace <path>";
@@ -54,12 +54,14 @@ function projectSlug(path) {
   return `${slug.slice(0, 200)}-${Math.abs(hash).toString(36)}`;
 }
 
-// Claude Code names the dir after NFC(realpath(cwd)), falling back to the path as given.
+// Claude Code names the dir after NFC(realpath(cwd)). A workspace deleted since then
+// resolves through its deepest surviving ancestor, so a symlinked parent like /tmp still maps.
 function canonical(path) {
   try {
     return realpathSync(path).normalize("NFC");
   } catch {
-    return path.normalize("NFC");
+    const parent = dirname(path);
+    return parent === path ? path.normalize("NFC") : join(canonical(parent), basename(path).normalize("NFC"));
   }
 }
 

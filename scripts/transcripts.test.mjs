@@ -152,6 +152,20 @@ describe("dir", () => {
     assert.equal(stdout.trim(), join(home, ".claude", "projects", "-Users-test-proj"));
   });
 
+  test("with CLAUDE_CODE_PROJECT_DIR_NAME, list and show also read the plain-slug dir", () => {
+    const home = tempDir();
+    const config = tempDir();
+    const env = { CLAUDE_CONFIG_DIR: config, CLAUDE_CODE_PROJECT_DIR_NAME: "my_proj" };
+    writeSession(join(config, "projects", "my_proj"), "sess-override", [prompt("after override")]);
+    writeSession(join(config, "projects", "-Users-test-proj"), "sess-plain", [prompt("before override")]);
+    const listed = run(home, ["list", "--workspace", "/Users/test/proj"], env);
+    assert.match(listed.stdout, /sess-override\s+1 prompts\s+after override/);
+    assert.match(listed.stdout, /sess-plain\s+1 prompts\s+before override/);
+    const shown = run(home, ["show", "sess-plain", "--workspace", "/Users/test/proj"], env);
+    assert.equal(shown.status, 0);
+    assert.match(shown.stdout, /## USER[^\n]*\nbefore override/);
+  });
+
   test("list reads sessions from CLAUDE_CONFIG_DIR", () => {
     const home = tempDir();
     const config = tempDir();

@@ -195,6 +195,15 @@ describe("list", () => {
     assert.ok(stdout.includes(`${"a".repeat(99)}😀…`));
   });
 
+  for (const [kind, emoji] of [["flag", "🇺🇸"], ["ZWJ family", "👨‍👩‍👧"]]) {
+    test(`truncation does not split a ${kind} emoji`, () => {
+      const f = fixture();
+      writeSession(f.projectDir, "sess-a", [prompt(`${"a".repeat(99)}${emoji} and more text after`)]);
+      const { stdout } = run(f.home, f.args("list"));
+      assert.ok(stdout.includes(`${"a".repeat(99)}${emoji}…`), stdout);
+    });
+  }
+
   test("--days excludes older sessions", () => {
     const f = fixture();
     const now = Date.now();
@@ -297,6 +306,15 @@ describe("show", () => {
     const { stdout } = run(f.home, f.args("show", "sess-a", "--max-chars", "10"));
     assert.ok(stdout.includes("y".repeat(10)));
     assert.ok(!stdout.includes("y".repeat(11)));
+  });
+
+  test("--max-chars does not split emoji", () => {
+    const f = fixture();
+    writeSession(f.projectDir, "sess-a", [prompt("😀🇺🇸👨‍👩‍👧 hello")]);
+    for (const [max, body] of [["1", "😀"], ["2", "😀🇺🇸"], ["3", "😀🇺🇸👨‍👩‍👧"]]) {
+      const { stdout } = run(f.home, f.args("show", "sess-a", "--max-chars", max));
+      assert.equal(stdout.trimEnd().split("\n").at(-1), body, `--max-chars ${max}`);
+    }
   });
 
   test("finds a subagent transcript by id", () => {

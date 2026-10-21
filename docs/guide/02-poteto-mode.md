@@ -90,7 +90,7 @@ continue
 keep going until done
 ```
 
-Short works because the playbook holds the structure, and `/poteto-mode` stays in context for the rest of the session once invoked. [Set up pstack](./01-setup.md#run-your-first-task) shows how to start one. Your words carry the intent, and the skill carries the rigor.
+Short works because the playbook holds the structure, and the `pstack:poteto` output style keeps `/poteto-mode` on for every task. [Set up pstack](./01-setup.md#run-your-first-task) shows how to start one. Your words carry the intent, and the skill carries the rigor.
 
 ## Switch tasks with "new task"
 

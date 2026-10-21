@@ -1,7 +1,7 @@
 ---
 name: poteto-mode
 description: poteto's agent style for concise, detailed responses, deliberate subagents, unslopped prose, simple code, and verified work. Use for poteto, /poteto-mode, or requests to work in this style.
-when_to_use: "Only when the user asks for this skill by name, or a running pstack skill routes here."
+when_to_use: "Only when the user asks for this skill by name, the poteto output style is active, or a running pstack skill routes here."
 ---
 
 # Poteto mode

@@ -62,6 +62,6 @@ Pick something real but small, and describe it the way you'd describe it to a co
 
 Watch its first status line. It names the matched playbook, `Playbook: Feature` for this prompt, and the final reply ends with that playbook's steps as a checklist, every step marked. If `/poteto-mode` skips a step, the step stays in the list with `skip: <reason>`, so you can see what it chose not to do.
 
-From here you can type normal follow-ups. Once invoked, `/poteto-mode` stays in context for the rest of the session. After `/compact`, `/clear`, or in a new session, invoke it again at the start of the next task.
+From here you can type normal follow-ups. To keep `/poteto-mode` on for every task, the way a Cursor custom mode does, run `/output-style pstack:poteto`. Each new task then loads `poteto-mode` first, even after `/compact`, and quick questions get a direct answer. The choice stays on in this project until you run `/output-style default`. Set `"outputStyle": "pstack:poteto"` in `~/.claude/settings.json` to turn it on everywhere.
 
 Next: [Route work through `/poteto-mode`](./02-poteto-mode.md).

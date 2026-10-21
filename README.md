@@ -99,7 +99,13 @@ when invoked it:
 
 the full rules and playbooks live in [`skills/poteto-mode/SKILL.md`](./skills/poteto-mode/SKILL.md).
 
-once invoked, [`/poteto-mode`](./skills/poteto-mode/SKILL.md) stays in context for the rest of the session. after `/compact` or `/clear`, invoke it again at the start of the next task.
+to keep [`/poteto-mode`](./skills/poteto-mode/SKILL.md) on for every task, the way a cursor custom mode does, switch to the bundled output style:
+
+```bash
+/output-style pstack:poteto
+```
+
+every new task then loads `poteto-mode` first, including after `/compact`, and quick questions get a direct answer. the choice is saved in `.claude/settings.local.json`, so it stays on in that project until you run `/output-style default`. to turn it on in every project, set `"outputStyle": "pstack:poteto"` in `~/.claude/settings.json`. without the style, a `/poteto-mode` invocation lasts for the session, and you invoke it again after `/compact` or `/clear`.
 
 [`/poteto-mode`](./skills/poteto-mode/SKILL.md) works extremely well with claude code's `/loop` command. you can make claude code work for many hours without sacrificing rigor.
 
@@ -286,7 +292,7 @@ what changed from the cursor version, and why:
 | `claude-opus-5-5-xhigh`, `grok-4.7-xhigh-fast` slugs | `opus xhigh`, `sonnet xhigh` | claude code takes a model alias and an effort. per-agent fast mode does not exist, so `-fast` is gone |
 | `~/.cursor/rules/pstack-models.mdc` | `~/.claude/rules/pstack-models.md` | claude code loads user rules from `~/.claude/rules/` |
 | `~/.cursor/projects/<slug>/agent-transcripts/` | `~/.claude/projects/<slug>/<session>.jsonl`, read through [`scripts/transcripts.mjs`](./scripts/transcripts.mjs) | different layout and event format |
-| custom mode (option+enter) | invoke once per session | a loaded skill stays in context until compaction |
+| custom mode (option+enter) | `/output-style pstack:poteto` | an output style is sent with every request, so it survives compaction, and it tells claude to load `poteto-mode` for each task |
 | benny automations, `/make-bot-ui` | removed | both depend on cursor automations and grok bot routines |
 
 ## development

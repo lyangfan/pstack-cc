@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Answer the user's question about pstack, hand them a prompt they can send, and link the file the answer came from. For a help question, don't start the work. The user asked how, and a pstack run spends real tokens, so let them send the prompt.
 
-A message that asks for work, such as "use pstack to fix this bug", is not a help question. Read [`poteto-mode`](../poteto-mode/SKILL.md), do the work under it, and mention once that `/pstack:poteto-mode` stays in context for the rest of the session once invoked.
+A message that asks for work, such as "use pstack to fix this bug", is not a help question. Read [`poteto-mode`](../poteto-mode/SKILL.md), do the work under it, and mention once that `/output-style pstack:poteto` keeps it on for every task.
 
 This file maps questions to the skills and guide pages that hold the answers. Those files own the details. Read the file you route to before you quote it, and trust it when it disagrees with this map. The links here point into the installed plugin. Give the user the file's absolute path under `${CLAUDE_PLUGIN_ROOT}` so they can open it.
 
@@ -53,9 +53,8 @@ Other tools can read the skills, because they use the Agent Skills format. But m
 
 Whether `/poteto-mode` stays on depends on how the user starts it:
 
-- `/pstack:poteto-mode <task>` loads the skill into the conversation, and it stays in context for the rest of the session.
-- After `/compact` or a long run, the skill can drop out of context. Invoke it again at the start of the next task.
-- `/clear` or a new session starts without it.
+- `/output-style pstack:poteto` keeps it on, like a Cursor custom mode. Every new task loads `poteto-mode` first, even after `/compact`, and the choice is saved for the project until `/output-style default`. `"outputStyle": "pstack:poteto"` in `~/.claude/settings.json` turns it on in every project.
+- Without the style, `/pstack:poteto-mode <task>` loads the skill for that session only. After `/compact` or `/clear`, invoke it again.
 
 Link [Claude Code's skills docs](https://code.claude.com/docs/en/skills) when this comes up. Mid-chat, "new task" makes the mode match a fresh playbook. `/poteto-mode` already uses `pstack:poteto-agent` for the subagents its playbook steps spawn. To get the same style from a subagent of your own, spawn it with `subagent_type: "pstack:poteto-agent"`.
 
@@ -134,7 +133,7 @@ Principles are one-rule skills that `/poteto-mode` reads and cites in its replie
 
 | Symptom | Fix |
 |---|---|
-| The mode stopped applying after a few turns | Compaction or a long run pushed it out of context. Start each task with `/pstack:poteto-mode`. |
+| The mode stopped applying after a few turns | Compaction or a long run pushed it out of context. Run `/output-style pstack:poteto` so every task loads it. |
 | A question got treated as the next step of the last task | Say "new task", or say the turn doesn't need the mode. |
 | A new model choice had no effect | The rule from `/setup-pstack` applies to new chats. Start one. |
 | Runs cost more than expected | See the cost paragraph under Get set up. |

@@ -16,8 +16,24 @@ const option = (name, fallback) => {
   return index === -1 ? fallback : args[index + 1];
 };
 
+const usage = "usage: transcripts.mjs dir [workspace] | list [--days n] [--grep text] [--subagents] | show <session-id|file> [--grep text] [--results] [--max-chars n]";
+const number = (name, fallback) => {
+  const value = Number(option(name, fallback));
+  if (Number.isFinite(value)) return value;
+  console.error(usage);
+  process.exit(2);
+};
+
+function projectSlug(path) {
+  const slug = path.replace(/[^a-zA-Z0-9]/g, "-");
+  if (slug.length <= 200) return slug;
+  let hash = 0;
+  for (let i = 0; i < path.length; i++) hash = ((hash << 5) - hash + path.charCodeAt(i)) | 0;
+  return `${slug.slice(0, 200)}-${Math.abs(hash).toString(36)}`;
+}
+
 const workspace = resolve(option("workspace", command === "dir" && args[1] ? args[1] : process.cwd()));
-const projectDir = join(homedir(), ".claude", "projects", workspace.replace(/[/.]/g, "-"));
+const projectDir = join(process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), ".claude"), "projects", projectSlug(workspace));
 
 function sessionFiles(includeSubagents) {
   if (!existsSync(projectDir)) return [];
@@ -70,11 +86,12 @@ function summarize(path) {
 
 function oneLine(text, max) {
   const flat = text.replace(/\s+/g, " ").trim();
-  return flat.length > max ? `${flat.slice(0, max)}…` : flat;
+  const chars = [...flat];
+  return chars.length > max ? `${chars.slice(0, max).join("")}…` : flat;
 }
 
 function list() {
-  const days = Number(option("days", "7"));
+  const days = number("days", "7");
   const grep = option("grep")?.toLowerCase();
   const cutoff = Date.now() - days * 86_400_000;
   const rows = sessionFiles(flag("subagents")).filter(({ mtime }) => mtime >= cutoff);
@@ -98,7 +115,7 @@ function locate(target) {
 function show() {
   const path = locate(args[1]);
   const grep = option("grep")?.toLowerCase();
-  const maxChars = Number(option("max-chars", "2000"));
+  const maxChars = number("max-chars", "2000");
   const results = flag("results");
   console.log(`# ${path}`);
   for (const entry of entries(path)) {
@@ -124,7 +141,7 @@ try {
   else if (command === "list") list();
   else if (command === "show" && args[1]) show();
   else {
-    console.error("usage: transcripts.mjs dir [workspace] | list [--days n] [--grep text] [--subagents] | show <session-id|file> [--grep text] [--results]");
+    console.error(usage);
     process.exit(2);
   }
 } catch (error) {

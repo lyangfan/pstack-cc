@@ -76,8 +76,12 @@ function isPrompt(entry) {
   return typeof content === "string" || (Array.isArray(content) && content.some((part) => part.type === "text"));
 }
 
-function summarize(path) {
-  const all = entries(path);
+function contains(value, needle) {
+  if (typeof value === "string") return value.toLowerCase().includes(needle);
+  return Boolean(value) && typeof value === "object" && Object.values(value).some((child) => contains(child, needle));
+}
+
+function summarize(all) {
   const prompts = all.filter(isPrompt).map((entry) => textOf(entry.message.content).trim());
   const title = all.findLast((entry) => entry.type === "ai-title")?.aiTitle ?? "";
   const start = all.find((entry) => entry.timestamp)?.timestamp ?? "";
@@ -97,8 +101,9 @@ function list() {
   const rows = sessionFiles(flag("subagents")).filter(({ mtime }) => mtime >= cutoff);
   console.log(`# ${projectDir}`);
   for (const { path, mtime } of rows) {
-    if (grep && !readFileSync(path, "utf8").toLowerCase().includes(grep)) continue;
-    const { prompts, title } = summarize(path);
+    const all = entries(path);
+    if (grep && !contains(all, grep)) continue;
+    const { prompts, title } = summarize(all);
     const id = basename(path, ".jsonl");
     const when = `${new Date(mtime).toISOString().slice(0, 16).replace("T", " ")} UTC`;
     console.log(`${when}  ${id}  ${prompts.length} prompts  ${title ? `[${title}] ` : ""}${oneLine(prompts[0] ?? "", 100)}`);

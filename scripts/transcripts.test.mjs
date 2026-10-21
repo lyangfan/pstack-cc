@@ -108,6 +108,16 @@ describe("dir", () => {
     assert.equal(viaLink.stdout, run(home, ["dir", target]).stdout);
   });
 
+  test("resolves a deleted workspace through its symlinked parent", () => {
+    const home = tempDir();
+    const target = realpathSync(tempDir());
+    const link = join(tempDir(), "link");
+    symlinkSync(target, link);
+    const { status, stdout } = run(home, ["dir", join(link, "gone", "deeper")]);
+    assert.equal(status, 0);
+    assert.equal(stdout.trim(), join(home, ".claude", "projects", `${target}/gone/deeper`.replace(/[^a-zA-Z0-9]/g, "-")));
+  });
+
   test("NFC-normalizes the workspace and CLAUDE_CONFIG_DIR", () => {
     const home = tempDir();
     const config = tempDir();

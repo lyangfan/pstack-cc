@@ -1,0 +1,327 @@
+import { spawnSync } from "node:child_process";
+import assert from "node:assert/strict";
+import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
+import { after, describe, test } from "node:test";
+
+const script = join(import.meta.dirname, "transcripts.mjs");
+const roots = [];
+const DAY = 86_400_000;
+const workspace = "/work/space";
+const slug = "-work-space";
+
+function tempDir() {
+  const dir = mkdtempSync(join(tmpdir(), "transcripts-test-"));
+  roots.push(dir);
+  return dir;
+}
+
+after(() => {
+  for (const dir of roots) rmSync(dir, { recursive: true, force: true });
+});
+
+function run(home, args, extraEnv = {}) {
+  const env = { ...process.env, CLAUDE_CONFIG_DIR: undefined, HOME: home, ...extraEnv };
+  return spawnSync(process.execPath, [script, ...args], { env, encoding: "utf8" });
+}
+
+// Entries may be objects or raw strings (to plant malformed lines).
+function writeSession(projectDir, id, entries, { mtime, subagentOf } = {}) {
+  const file = subagentOf
+    ? join(projectDir, subagentOf, "subagents", `${id}.jsonl`)
+    : join(projectDir, `${id}.jsonl`);
+  mkdirSync(dirname(file), { recursive: true });
+  writeFileSync(file, entries.map((e) => (typeof e === "string" ? e : JSON.stringify(e))).join("\n") + "\n");
+  if (mtime !== undefined) utimesSync(file, new Date(mtime), new Date(mtime));
+  return file;
+}
+
+const prompt = (text, extra = {}) => ({
+  type: "user",
+  message: { role: "user", content: text },
+  timestamp: "2026-01-02T03:04:05.000Z",
+  uuid: crypto.randomUUID(),
+  ...extra,
+});
+const toolResult = (text, id = "toolu_1") => ({
+  type: "user",
+  message: { role: "user", content: [{ type: "tool_result", tool_use_id: id, content: text }] },
+  timestamp: "2026-01-02T03:04:07.000Z",
+});
+const assistant = (...parts) => ({
+  type: "assistant",
+  message: { role: "assistant", content: parts },
+  timestamp: "2026-01-02T03:04:06.000Z",
+});
+const text = (t) => ({ type: "text", text: t });
+
+function fixture() {
+  const home = tempDir();
+  const projectDir = join(home, ".claude", "projects", slug);
+  mkdirSync(projectDir, { recursive: true });
+  return { home, projectDir, args: (...rest) => [...rest, "--workspace", workspace] };
+}
+
+describe("dir", () => {
+  const cases = [
+    ["/Users/test/proj", "-Users-test-proj"],
+    ["/Users/test/My Project_1", "-Users-test-My-Project-1"],
+    ["/Users/test/a.b@c+d", "-Users-test-a-b-c-d"],
+    ["/w/" + "a".repeat(210), "-w-" + "a".repeat(197) + "-u83o13"],
+  ];
+  for (const [path, name] of cases) {
+    test(`maps ${path.length > 40 ? `a ${path.length}-char path` : path} to ${name.length > 40 ? "a truncated hashed name" : name}`, () => {
+      const home = tempDir();
+      const { status, stdout } = run(home, ["dir", path]);
+      assert.equal(status, 0);
+      assert.equal(stdout.trim(), join(home, ".claude", "projects", name));
+    });
+  }
+
+  test("--workspace overrides the positional workspace", () => {
+    const home = tempDir();
+    const { stdout } = run(home, ["dir", "--workspace", "/Users/test/other"]);
+    assert.equal(stdout.trim(), join(home, ".claude", "projects", "-Users-test-other"));
+  });
+
+  test("CLAUDE_CONFIG_DIR replaces ~/.claude", () => {
+    const home = tempDir();
+    const config = tempDir();
+    const { status, stdout } = run(home, ["dir", "/Users/test/proj"], { CLAUDE_CONFIG_DIR: config });
+    assert.equal(status, 0);
+    assert.equal(stdout.trim(), join(config, "projects", "-Users-test-proj"));
+  });
+
+  test("list reads sessions from CLAUDE_CONFIG_DIR", () => {
+    const home = tempDir();
+    const config = tempDir();
+    writeSession(join(config, "projects", "-Users-test-proj"), "in-config", [prompt("from config home")]);
+    const { stdout } = run(home, ["list", "--workspace", "/Users/test/proj"], { CLAUDE_CONFIG_DIR: config });
+    assert.match(stdout, /in-config\s+1 prompts\s+from config home/);
+  });
+});
+
+describe("list", () => {
+  test("prints only the header and exits 0 when the project dir is missing", () => {
+    const home = tempDir();
+    const { status, stdout } = run(home, ["list", "--workspace", workspace]);
+    assert.equal(status, 0);
+    assert.deepEqual(stdout.trim().split("\n"), [`# ${join(home, ".claude", "projects", slug)}`]);
+  });
+
+  test("lists newest session first", () => {
+    const f = fixture();
+    const now = Date.now();
+    writeSession(f.projectDir, "sess-old", [prompt("old")], { mtime: now - 3 * DAY });
+    writeSession(f.projectDir, "sess-new", [prompt("new")], { mtime: now - 1000 });
+    writeSession(f.projectDir, "sess-mid", [prompt("mid")], { mtime: now - DAY });
+    const { status, stdout } = run(f.home, f.args("list"));
+    assert.equal(status, 0);
+    const ids = stdout.split("\n").flatMap((line) => line.match(/sess-\w+/) ?? []);
+    assert.deepEqual(ids, ["sess-new", "sess-mid", "sess-old"]);
+  });
+
+  test("counts only real prompts and shows the last ai-title", () => {
+    const f = fixture();
+    writeSession(f.projectDir, "sess-a", [
+      { type: "mode", mode: "normal" },
+      { type: "ai-title", aiTitle: "First title" },
+      prompt("fix the login bug"),
+      prompt("<system-reminder>injected</system-reminder>", { isMeta: true }),
+      assistant(text("on it"), { type: "tool_use", id: "toolu_1", name: "Read", input: { file_path: "/x" } }),
+      toolResult("file contents"),
+      "{not valid json",
+      prompt("now add tests"),
+      { type: "ai-title", aiTitle: "Login fix" },
+      { type: "last-prompt", lastPrompt: "now add tests" },
+    ]);
+    const { status, stdout } = run(f.home, f.args("list"));
+    assert.equal(status, 0);
+    assert.match(stdout, /sess-a\s+2 prompts\s+\[Login fix\] fix the login bug/);
+    assert.doesNotMatch(stdout, /First title/);
+  });
+
+  test("omits the bracket when there is no ai-title", () => {
+    const f = fixture();
+    writeSession(f.projectDir, "sess-a", [prompt("plain")]);
+    const { stdout } = run(f.home, f.args("list"));
+    assert.match(stdout, /sess-a\s+1 prompts\s+plain/);
+    assert.doesNotMatch(stdout, /\[/);
+  });
+
+  test("truncates a long first prompt to 100 chars with an ellipsis", () => {
+    const f = fixture();
+    writeSession(f.projectDir, "sess-a", [prompt("x".repeat(150))]);
+    const { stdout } = run(f.home, f.args("list"));
+    assert.ok(stdout.includes(`${"x".repeat(100)}…`));
+    assert.ok(!stdout.includes("x".repeat(101)));
+  });
+
+  test("collapses whitespace in the first prompt", () => {
+    const f = fixture();
+    writeSession(f.projectDir, "sess-a", [prompt("line one\n\n   line   two")]);
+    const { stdout } = run(f.home, f.args("list"));
+    assert.ok(stdout.includes("line one line two"));
+  });
+
+  test("truncation does not split an emoji", () => {
+    const f = fixture();
+    writeSession(f.projectDir, "sess-a", [prompt(`${"a".repeat(99)}😀 and more text after`)]);
+    const { stdout } = run(f.home, f.args("list"));
+    assert.ok(stdout.includes(`${"a".repeat(99)}😀…`));
+  });
+
+  test("--days excludes older sessions", () => {
+    const f = fixture();
+    const now = Date.now();
+    writeSession(f.projectDir, "sess-recent", [prompt("recent")], { mtime: now - DAY });
+    writeSession(f.projectDir, "sess-ancient", [prompt("ancient")], { mtime: now - 30 * DAY });
+    const week = run(f.home, f.args("list")).stdout;
+    assert.match(week, /sess-recent/);
+    assert.doesNotMatch(week, /sess-ancient/);
+    const narrow = run(f.home, f.args("list", "--days", "0.5")).stdout;
+    assert.doesNotMatch(narrow, /sess-recent/);
+    const wide = run(f.home, f.args("list", "--days", "60")).stdout;
+    assert.match(wide, /sess-recent/);
+    assert.match(wide, /sess-ancient/);
+  });
+
+  test("--grep filters case-insensitively", () => {
+    const f = fixture();
+    writeSession(f.projectDir, "sess-k8s", [prompt("deploy to Kubernetes")]);
+    writeSession(f.projectDir, "sess-other", [prompt("rename a variable")]);
+    const { stdout } = run(f.home, f.args("list", "--grep", "KUBERNETES"));
+    assert.match(stdout, /sess-k8s/);
+    assert.doesNotMatch(stdout, /sess-other/);
+  });
+
+  test("subagent transcripts appear only with --subagents", () => {
+    const f = fixture();
+    writeSession(f.projectDir, "sess-main", [prompt("main task")]);
+    writeSession(f.projectDir, "agent-x", [prompt("subagent task")], { subagentOf: "sess-main" });
+    const without = run(f.home, f.args("list")).stdout;
+    assert.match(without, /sess-main/);
+    assert.doesNotMatch(without, /agent-x/);
+    const withFlag = run(f.home, f.args("list", "--subagents")).stdout;
+    assert.match(withFlag, /sess-main/);
+    assert.match(withFlag, /agent-x\s+1 prompts\s+subagent task/);
+  });
+});
+
+describe("show", () => {
+  function conversation(f) {
+    return writeSession(f.projectDir, "sess-a", [
+      { type: "permission-mode", permissionMode: "default" },
+      prompt("please read the config"),
+      assistant({ type: "thinking", thinking: "hmm" }, text("Reading it now."), {
+        type: "tool_use",
+        id: "toolu_1",
+        name: "Read",
+        input: { file_path: "/etc/config" },
+      }),
+      "garbage {{",
+      toolResult("port=8080"),
+      assistant(text("The port is 8080.")),
+      { type: "system", content: "noise" },
+    ]);
+  }
+
+  test("labels prompts, assistant text and tool calls; hides results by default", () => {
+    const f = fixture();
+    conversation(f);
+    const { status, stdout } = run(f.home, f.args("show", "sess-a"));
+    assert.equal(status, 0);
+    assert.match(stdout, /## USER[^\n]*\nplease read the config/);
+    assert.match(stdout, /## ASSISTANT[^\n]*\nReading it now\.\n→ Read \{"file_path":"\/etc\/config"\}/);
+    assert.match(stdout, /## ASSISTANT[^\n]*\nThe port is 8080\./);
+    assert.doesNotMatch(stdout, /hmm/);
+    assert.doesNotMatch(stdout, /←/);
+    assert.doesNotMatch(stdout, /port=8080/);
+    assert.doesNotMatch(stdout, /noise/);
+  });
+
+  test("--results shows tool results", () => {
+    const f = fixture();
+    conversation(f);
+    const { stdout } = run(f.home, f.args("show", "sess-a", "--results"));
+    assert.match(stdout, /← port=8080/);
+  });
+
+  test("--grep keeps only matching blocks, case-insensitively", () => {
+    const f = fixture();
+    conversation(f);
+    const { stdout } = run(f.home, f.args("show", "sess-a", "--grep", "THE PORT"));
+    assert.match(stdout, /The port is 8080\./);
+    assert.doesNotMatch(stdout, /please read the config/);
+    assert.doesNotMatch(stdout, /Reading it now/);
+  });
+
+  test("--max-chars truncates text", () => {
+    const f = fixture();
+    writeSession(f.projectDir, "sess-a", [prompt("y".repeat(50))]);
+    const { stdout } = run(f.home, f.args("show", "sess-a", "--max-chars", "10"));
+    assert.ok(stdout.includes("y".repeat(10)));
+    assert.ok(!stdout.includes("y".repeat(11)));
+  });
+
+  test("finds a subagent transcript by id", () => {
+    const f = fixture();
+    writeSession(f.projectDir, "sess-main", [prompt("main")]);
+    writeSession(f.projectDir, "agent-x", [prompt("subagent prompt")], { subagentOf: "sess-main" });
+    const { status, stdout } = run(f.home, f.args("show", "agent-x"));
+    assert.equal(status, 0);
+    assert.match(stdout, /## USER[^\n]*\nsubagent prompt/);
+  });
+
+  test("accepts a file path", () => {
+    const f = fixture();
+    const file = conversation(f);
+    const elsewhere = run(tempDir(), ["show", file]);
+    assert.equal(elsewhere.status, 0);
+    assert.match(elsewhere.stdout, /please read the config/);
+  });
+
+  test("unknown id exits 1 with a message on stderr", () => {
+    const f = fixture();
+    const { status, stdout, stderr } = run(f.home, f.args("show", "nope"));
+    assert.equal(status, 1);
+    assert.match(stderr, /no transcript/);
+    assert.equal(stdout, "");
+  });
+});
+
+describe("usage errors", () => {
+  function assertUsage({ status, stderr }) {
+    assert.equal(status, 2);
+    assert.match(stderr, /usage/i);
+  }
+
+  test("no arguments", () => assertUsage(run(tempDir(), [])));
+  test("unknown command", () => assertUsage(run(tempDir(), ["frobnicate"])));
+  test("show without an id", () => assertUsage(run(tempDir(), ["show"])));
+
+  test("list --days abc", () => {
+    const f = fixture();
+    writeSession(f.projectDir, "sess-a", [prompt("hi")]);
+    const result = run(f.home, f.args("list", "--days", "abc"));
+    assertUsage(result);
+    assert.equal(result.stdout, "");
+  });
+
+  test("list --days with no value", () => {
+    const f = fixture();
+    writeSession(f.projectDir, "sess-a", [prompt("hi")]);
+    const result = run(f.home, ["list", "--workspace", workspace, "--days"]);
+    assertUsage(result);
+    assert.equal(result.stdout, "");
+  });
+
+  test("show --max-chars x", () => {
+    const f = fixture();
+    writeSession(f.projectDir, "sess-a", [prompt("hi")]);
+    const result = run(f.home, f.args("show", "sess-a", "--max-chars", "x"));
+    assertUsage(result);
+    assert.equal(result.stdout, "");
+  });
+});

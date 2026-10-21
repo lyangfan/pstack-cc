@@ -88,10 +88,18 @@ function summarize(all) {
   return { prompts, title, start };
 }
 
+const graphemes = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+
+function truncate(text, max) {
+  let count = 0;
+  for (const { index } of graphemes.segment(text)) if (count++ === max) return text.slice(0, index);
+  return text;
+}
+
 function oneLine(text, max) {
   const flat = text.replace(/\s+/g, " ").trim();
-  const chars = [...flat];
-  return chars.length > max ? `${chars.slice(0, max).join("")}…` : flat;
+  const cut = truncate(flat, max);
+  return cut === flat ? flat : `${cut}…`;
 }
 
 function list() {
@@ -129,7 +137,7 @@ function show() {
     const parts = typeof content === "string" ? [{ type: "text", text: content }] : Array.isArray(content) ? content : [];
     const lines = [];
     for (const part of parts) {
-      if (part.type === "text" && part.text?.trim()) lines.push(part.text.trim().slice(0, maxChars));
+      if (part.type === "text" && part.text?.trim()) lines.push(truncate(part.text.trim(), maxChars));
       if (part.type === "tool_use") lines.push(`→ ${part.name} ${oneLine(JSON.stringify(part.input ?? {}), 300)}`);
       if (part.type === "tool_result" && results) lines.push(`← ${oneLine(textOf(part.content), 300)}`);
     }

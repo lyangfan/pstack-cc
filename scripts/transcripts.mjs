@@ -7,22 +7,44 @@
 import { existsSync, readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join, resolve } from "node:path";
+import { parseArgs } from "node:util";
 
-const args = process.argv.slice(2);
-const command = args[0];
-const flag = (name) => args.includes(`--${name}`);
-const option = (name, fallback) => {
-  const index = args.indexOf(`--${name}`);
-  return index === -1 ? fallback : args[index + 1];
-};
+const usage = "usage: transcripts.mjs dir [workspace] | list [--days n] [--grep text] [--subagents] | show <session-id|file> [--grep text] [--results] [--max-chars n], each with optional --workspace <path>";
 
-const usage = "usage: transcripts.mjs dir [workspace] | list [--days n] [--grep text] [--subagents] | show <session-id|file> [--grep text] [--results] [--max-chars n]";
-const number = (name, fallback) => {
-  const value = Number(option(name, fallback));
-  if (Number.isFinite(value)) return value;
-  console.error(usage);
+function parseCommandLine() {
+  const { values, positionals } = parseArgs({
+    allowPositionals: true,
+    options: {
+      workspace: { type: "string" },
+      days: { type: "string", default: "7" },
+      grep: { type: "string" },
+      "max-chars": { type: "string", default: "2000" },
+      subagents: { type: "boolean", default: false },
+      results: { type: "boolean", default: false },
+    },
+  });
+  if (!/^\d+(\.\d+)?$/.test(values.days) || Number(values.days) === 0) throw new Error(`invalid --days ${values.days}`);
+  if (!/^[1-9]\d*$/.test(values["max-chars"])) throw new Error(`invalid --max-chars ${values["max-chars"]}`);
+  const [command, target] = positionals;
+  return {
+    command,
+    target,
+    workspace: values.workspace ?? (command === "dir" ? target : undefined) ?? process.cwd(),
+    days: Number(values.days),
+    grep: values.grep?.toLowerCase(),
+    maxChars: Number(values["max-chars"]),
+    subagents: values.subagents,
+    results: values.results,
+  };
+}
+
+let options;
+try {
+  options = parseCommandLine();
+} catch (error) {
+  console.error(`${error.message}\n${usage}`);
   process.exit(2);
-};
+}
 
 function projectSlug(path) {
   const slug = path.replace(/[^a-zA-Z0-9]/g, "-");
@@ -41,7 +63,7 @@ function canonical(path) {
   }
 }
 
-const workspace = canonical(resolve(option("workspace", command === "dir" && args[1] ? args[1] : process.cwd())));
+const workspace = canonical(resolve(options.workspace));
 const configDir = (process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), ".claude")).normalize("NFC");
 const projectDir = join(configDir, "projects", projectSlug(workspace));
 
@@ -113,10 +135,9 @@ function oneLine(text, max) {
 }
 
 function list() {
-  const days = number("days", "7");
-  const grep = option("grep")?.toLowerCase();
+  const { days, grep } = options;
   const cutoff = Date.now() - days * 86_400_000;
-  const rows = sessionFiles(flag("subagents")).filter(({ mtime }) => mtime >= cutoff);
+  const rows = sessionFiles(options.subagents).filter(({ mtime }) => mtime >= cutoff);
   console.log(`# ${projectDir}`);
   for (const { path, mtime } of rows) {
     const all = entries(path);
@@ -136,10 +157,8 @@ function locate(target) {
 }
 
 function show() {
-  const path = locate(args[1]);
-  const grep = option("grep")?.toLowerCase();
-  const maxChars = number("max-chars", "2000");
-  const results = flag("results");
+  const { grep, maxChars, results } = options;
+  const path = locate(options.target);
   console.log(`# ${path}`);
   for (const entry of entries(path)) {
     if (entry.type !== "user" && entry.type !== "assistant") continue;
@@ -160,9 +179,9 @@ function show() {
 }
 
 try {
-  if (command === "dir") console.log(projectDir);
-  else if (command === "list") list();
-  else if (command === "show" && args[1]) show();
+  if (options.command === "dir") console.log(projectDir);
+  else if (options.command === "list") list();
+  else if (options.command === "show" && options.target) show();
   else {
     console.error(usage);
     process.exit(2);

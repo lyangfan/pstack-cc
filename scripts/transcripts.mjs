@@ -100,7 +100,7 @@ function list() {
     if (grep && !readFileSync(path, "utf8").toLowerCase().includes(grep)) continue;
     const { prompts, title } = summarize(path);
     const id = basename(path, ".jsonl");
-    const when = new Date(mtime).toISOString().slice(0, 16).replace("T", " ");
+    const when = `${new Date(mtime).toISOString().slice(0, 16).replace("T", " ")} UTC`;
     console.log(`${when}  ${id}  ${prompts.length} prompts  ${title ? `[${title}] ` : ""}${oneLine(prompts[0] ?? "", 100)}`);
   }
 }

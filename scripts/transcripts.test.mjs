@@ -394,4 +394,28 @@ describe("usage errors", () => {
     assertUsage(result);
     assert.equal(result.stdout, "");
   });
+
+  const rejected = [
+    ...["", " ", "-1", "0"].map((days) => ["list", "--days", days]),
+    ...["", "0", "-1", "1.5"].map((max) => ["show", "sess-a", "--max-chars", max]),
+    ["show", "nope", "--max-chars", "x"],
+  ];
+  for (const argv of rejected) {
+    test(JSON.stringify(argv), () => {
+      const f = fixture();
+      writeSession(f.projectDir, "sess-a", [prompt("hello world")]);
+      const result = run(f.home, f.args(...argv));
+      assertUsage(result);
+      assert.equal(result.stdout, "");
+    });
+  }
+
+  for (const argv of [["list", "--workspace"], ["dir", "--days"]]) {
+    test(`${argv.join(" ")} with no value`, () => {
+      const result = run(tempDir(), argv);
+      assertUsage(result);
+      assert.equal(result.stdout, "");
+      assert.doesNotMatch(result.stderr, /\n\s+at /);
+    });
+  }
 });

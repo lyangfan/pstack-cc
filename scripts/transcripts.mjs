@@ -11,6 +11,9 @@ import { parseArgs } from "node:util";
 
 const usage = "usage: transcripts.mjs dir [workspace] | list [--days n] [--grep text] [--subagents] | show <session-id|file> [--grep text] [--results] [--max-chars n], each with optional --workspace <path>";
 
+// The fewest and most positionals each command takes after its name.
+const arity = { dir: [0, 1], list: [0, 0], show: [1, 1] };
+
 function parseCommandLine() {
   const { values, positionals } = parseArgs({
     allowPositionals: true,
@@ -25,7 +28,13 @@ function parseCommandLine() {
   });
   if (!/^\d+(\.\d+)?$/.test(values.days) || Number(values.days) === 0) throw new Error(`invalid --days ${values.days}`);
   if (!/^[1-9]\d*$/.test(values["max-chars"])) throw new Error(`invalid --max-chars ${values["max-chars"]}`);
-  const [command, target] = positionals;
+  const [command, ...rest] = positionals;
+  if (command === undefined) throw new Error("missing command");
+  if (!Object.hasOwn(arity, command)) throw new Error(`unknown command ${command}`);
+  const [min, max] = arity[command];
+  if (rest.length < min) throw new Error(`${command} needs a session id or file`);
+  if (rest.length > max) throw new Error(`unexpected argument ${rest[max]}`);
+  const [target] = rest;
   return {
     command,
     target,
@@ -207,11 +216,7 @@ function show() {
 try {
   if (options.command === "dir") console.log(projectDirs[0]);
   else if (options.command === "list") list();
-  else if (options.command === "show" && options.target) show();
-  else {
-    console.error(usage);
-    process.exit(2);
-  }
+  else show();
 } catch (error) {
   console.error(error.message);
   process.exit(1);

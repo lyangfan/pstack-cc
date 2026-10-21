@@ -6,7 +6,7 @@ when_to_use: "Only when the user asks for this skill by name, or a running pstac
 
 # Arena
 
-Open a todo list with one entry per phase (Frame, Fan out, Cross-judge, Pick, Graft, Verify) before launching anything.
+Post a checklist in your reply with one entry per phase (Frame, Fan out, Cross-judge, Pick, Graft, Verify) before launching anything, and repost it as phases finish.
 
 ## Phase A: Frame
 

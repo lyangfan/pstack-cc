@@ -60,7 +60,7 @@ Pick something real but small, and describe it the way you'd describe it to a co
 /poteto-mode add a --json flag to this command. text output stays byte-identical. verify both.
 ```
 
-Watch the todo list. Its first items are the matched playbook's steps copied in, the Feature playbook for this prompt. If `/poteto-mode` skips a step, the step stays in the list with `skip: <reason>`, so you can see what it chose not to do.
+Watch its first message. It opens with `Playbook: Feature` and that playbook's steps as a checklist, and the final reply repeats the checklist with every step marked. If `/poteto-mode` skips a step, the step stays in the list with `skip: <reason>`, so you can see what it chose not to do.
 
 From here you can type normal follow-ups. Once invoked, `/poteto-mode` stays in context for the rest of the session. After `/compact`, `/clear`, or in a new session, invoke it again at the start of the next task.
 

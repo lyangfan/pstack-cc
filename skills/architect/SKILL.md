@@ -10,7 +10,7 @@ Sketch types, function signatures, class shapes, and module boundaries with `not
 
 ## Start
 
-Open a todo list with one entry per phase before starting.
+Post a checklist in your reply with one entry per phase before starting, and repost it as phases finish.
 
 1. Ground
 2. Sketch

@@ -1,6 +1,6 @@
 # Route work through `/poteto-mode`
 
-`/poteto-mode` is the front door. You give it a goal, it matches one of twenty-three playbooks, copies that playbook's steps into the todo list, and calls the other skills as the steps need them. In this page you learn what a good prompt looks like, and how little of one you actually need.
+`/poteto-mode` is the front door. You give it a goal, it matches one of twenty-three playbooks, posts that playbook's steps as a checklist in its reply, and calls the other skills as the steps need them. In this page you learn what a good prompt looks like, and how little of one you actually need.
 
 ![A dispatcher pulls a switch lever to route robots on rail handcars toward lit gates, under a /poteto-mode departure board listing BUG FIX, FEATURE, and INVESTIGATION.](./images/router.jpg)
 
@@ -35,7 +35,7 @@ You don't write a spec. You say what's wrong or what you want, plus anything you
 /poteto-mode users get two notifications after a retry. repro first, then fix and verify.
 ```
 
-That's a Bug fix prompt. "repro first" is a real constraint, not politeness, and the playbook honors it. Watch the todo list fill with the Bug fix steps. A skipped step stays visible with `skip: <reason>`.
+That's a Bug fix prompt. "repro first" is a real constraint, not politeness, and the playbook honors it. Watch for the `Playbook: Bug fix` checklist in its first message. A skipped step stays visible with `skip: <reason>`.
 
 ## What goes in a prompt
 

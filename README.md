@@ -93,7 +93,7 @@ morning.
 
 when invoked it:
 
-1. matches your task to a [playbook](./skills/poteto-mode/playbooks/) and opens a todo list whose first items are its steps, copied in verbatim.
+1. matches your task to a [playbook](./skills/poteto-mode/playbooks/) and posts its steps, copied in verbatim, as a checklist in the reply. the final reply marks every step done or `skip: <reason>`.
 2. routes to the other skills as the steps fire.
 3. writes unslopped replies framed for the consumer and the maintainer.
 
@@ -102,6 +102,8 @@ the full rules and playbooks live in [`skills/poteto-mode/SKILL.md`](./skills/po
 once invoked, [`/poteto-mode`](./skills/poteto-mode/SKILL.md) stays in context for the rest of the session. after `/compact` or `/clear`, invoke it again at the start of the next task.
 
 [`/poteto-mode`](./skills/poteto-mode/SKILL.md) works extremely well with claude code's `/loop` command. you can make claude code work for many hours without sacrificing rigor.
+
+running it headless (`claude -p "/poteto-mode ..."`) works too. with `--output-format stream-json`, the stream emits a `result` event every time the main turn ends, including while background subagents are still running, so a run can emit several. the run is done when the process exits, and the last `result` holds the final reply.
 
 ## skills
 
@@ -205,7 +207,7 @@ help:              /poteto-help which skill should i use to review this branch?
 
 ## the subagents
 
-[`/poteto-mode`](./skills/poteto-mode/SKILL.md) runs in the chat that receives it. that chat owns the playbook, the todo list, and every subagent spawn.
+[`/poteto-mode`](./skills/poteto-mode/SKILL.md) runs in the chat that receives it. that chat owns the playbook, the checklist, and every subagent spawn.
 
 pstack also ships [`subagent_type: "pstack:poteto-agent"`](./agents/poteto-agent.md) as the wrapper for delegates spawned during a run. it starts with `poteto-mode` preloaded through the agent's `skills` field, including its inline principles index. substituting `general-purpose` skips that and drifts. do not spawn `pstack:poteto-agent` to run the playbook itself.
 
@@ -286,6 +288,10 @@ what changed from the cursor version, and why:
 | `~/.cursor/projects/<slug>/agent-transcripts/` | `~/.claude/projects/<slug>/<session>.jsonl`, read through [`scripts/transcripts.mjs`](./scripts/transcripts.mjs) | different layout and event format |
 | custom mode (option+enter) | invoke once per session | a loaded skill stays in context until compaction |
 | benny automations, `/make-bot-ui` | removed | both depend on cursor automations and grok bot routines |
+
+## development
+
+`npm test` runs the node test suite under `scripts/`. the `.ts` tests under `skills/poteto-mode/scripts/` need bun (`bun test` in that folder), so a bare `node --test` from the root fails on them.
 
 ## license
 

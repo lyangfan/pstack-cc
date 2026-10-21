@@ -10,7 +10,7 @@ pstack 由 **Lauren Tan（[@poteto](https://x.com/poteto)）** 创作。原作�
 
 - 原项目地址：<https://github.com/cursor/plugins/tree/main/pstack>
 - 本移植版基于 pstack 0.15.29，提交 [`190d287`](https://github.com/cursor/plugins/tree/190d28736eff128ec94f502a22c7fe0c4b56cd37/pstack)。
-- 许可证：MIT，版权所有 (c) 2026 Lauren Tan，详见 [LICENSE](./LICENSE)。
+- 许可证：MIT。pstack 版权所有 (c) 2026 Lauren Tan，Claude Code 移植部分版权所有 (c) 2026 lyangfan，详见 [LICENSE](./LICENSE)。
 
 感谢 poteto 设计了 pstack 并公开分享。这里的 playbook、原则，以及背后对工程严谨性的坚持，都是原作者的成果，本仓库只是把它们适配到 Claude Code。移植版的问题请在本仓库反馈，不要提到上游。想用 Cursor 版，请去原项目。
 
@@ -326,4 +326,4 @@ Claude Code 本身就有 plan mode（Shift+Tab），和 pstack 配合得很好�
 
 ## 许可证
 
-MIT。版权所有 (c) 2026 Lauren Tan，即 pstack 的原作者。Claude Code 移植版以同样的许可证发布，详见 [LICENSE](./LICENSE)。
+MIT。pstack 版权所有 (c) 2026 Lauren Tan，即 pstack 的原作者；Claude Code 移植部分版权所有 (c) 2026 lyangfan，以同样的许可证发布。详见 [LICENSE](./LICENSE)。

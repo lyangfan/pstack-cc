@@ -10,7 +10,7 @@ pstack was created by **Lauren Tan ([@poteto](https://x.com/poteto))**, who work
 
 - Original project: <https://github.com/cursor/plugins/tree/main/pstack>
 - This port starts from pstack 0.15.29, commit [`190d287`](https://github.com/cursor/plugins/tree/190d28736eff128ec94f502a22c7fe0c4b56cd37/pstack).
-- License: MIT, copyright (c) 2026 Lauren Tan. See [LICENSE](./LICENSE).
+- License: MIT. Copyright (c) 2026 Lauren Tan for pstack, and (c) 2026 lyangfan for the Claude Code port. See [LICENSE](./LICENSE).
 
 Thank you to poteto for designing pstack and sharing it openly. The playbooks, the principles, and the rigor behind them are all the original author's work. This repository only adapts them to Claude Code. Problems with the port belong here, not upstream. For the Cursor version, go to the original project.
 
@@ -329,4 +329,4 @@ what changed from the cursor version, and why:
 
 ## license
 
-MIT. Copyright (c) 2026 Lauren Tan, the original author of pstack. The Claude Code port is released under the same license. See [LICENSE](./LICENSE).
+MIT. Copyright (c) 2026 Lauren Tan, the original author of pstack, and copyright (c) 2026 lyangfan for the Claude Code port, released under the same license. See [LICENSE](./LICENSE).

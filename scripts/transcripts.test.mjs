@@ -124,6 +124,24 @@ describe("dir", () => {
     assert.equal(stdout.trim(), join(config, "projects", "-Users-test-proj"));
   });
 
+  test("CLAUDE_CODE_PROJECT_DIR_NAME names the dir when CLAUDE_CONFIG_DIR is set", () => {
+    const home = tempDir();
+    const config = tempDir();
+    const { stdout } = run(home, ["dir", "/Users/test/proj"], { CLAUDE_CONFIG_DIR: config, CLAUDE_CODE_PROJECT_DIR_NAME: "my_proj-1" });
+    assert.equal(stdout.trim(), join(config, "projects", "my_proj-1"));
+  });
+
+  test("CLAUDE_CODE_PROJECT_DIR_NAME is ignored when invalid or without CLAUDE_CONFIG_DIR", () => {
+    const home = tempDir();
+    const config = tempDir();
+    for (const name of ["a/b", "a.b", "COM1", "nul", "x".repeat(65)]) {
+      const { stdout } = run(home, ["dir", "/Users/test/proj"], { CLAUDE_CONFIG_DIR: config, CLAUDE_CODE_PROJECT_DIR_NAME: name });
+      assert.equal(stdout.trim(), join(config, "projects", "-Users-test-proj"), name);
+    }
+    const { stdout } = run(home, ["dir", "/Users/test/proj"], { CLAUDE_CODE_PROJECT_DIR_NAME: "my_proj" });
+    assert.equal(stdout.trim(), join(home, ".claude", "projects", "-Users-test-proj"));
+  });
+
   test("list reads sessions from CLAUDE_CONFIG_DIR", () => {
     const home = tempDir();
     const config = tempDir();

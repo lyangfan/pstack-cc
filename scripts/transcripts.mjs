@@ -4,7 +4,7 @@
 //   transcripts.mjs list [--workspace <path>] [--days <n>] [--grep <text>] [--subagents]
 //   transcripts.mjs show <session-id | file> [--workspace <path>] [--grep <text>] [--results] [--max-chars <n>]
 
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join, resolve } from "node:path";
 
@@ -32,8 +32,18 @@ function projectSlug(path) {
   return `${slug.slice(0, 200)}-${Math.abs(hash).toString(36)}`;
 }
 
-const workspace = resolve(option("workspace", command === "dir" && args[1] ? args[1] : process.cwd()));
-const projectDir = join(process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), ".claude"), "projects", projectSlug(workspace));
+// Claude Code names the dir after NFC(realpath(cwd)), falling back to the path as given.
+function canonical(path) {
+  try {
+    return realpathSync(path).normalize("NFC");
+  } catch {
+    return path.normalize("NFC");
+  }
+}
+
+const workspace = canonical(resolve(option("workspace", command === "dir" && args[1] ? args[1] : process.cwd())));
+const configDir = (process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), ".claude")).normalize("NFC");
+const projectDir = join(configDir, "projects", projectSlug(workspace));
 
 function sessionFiles(includeSubagents) {
   if (!existsSync(projectDir)) return [];

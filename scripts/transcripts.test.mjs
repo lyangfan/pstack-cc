@@ -390,6 +390,14 @@ describe("show", () => {
     }
   });
 
+  test("--max-chars bounds output when one grapheme is huge", () => {
+    const f = fixture();
+    writeSession(f.projectDir, "sess-a", [prompt(`a${"́".repeat(200_000)}bcd`)]);
+    const { status, stdout } = run(f.home, f.args("show", "sess-a", "--max-chars", "5"));
+    assert.equal(status, 0);
+    assert.ok(stdout.length < 1000, `printed ${stdout.length} chars`);
+  });
+
   test("finds a subagent transcript by id", () => {
     const f = fixture();
     writeSession(f.projectDir, "sess-main", [prompt("main")]);

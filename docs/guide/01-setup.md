@@ -8,7 +8,7 @@ In a Claude Code session, add the marketplace and install the plugin:
 
 ```text
 /plugin marketplace add lyangfan/pstack-cc
-/plugin install pstack@pstack-local
+/plugin install pstack@pstack-cc
 ```
 
 `/plugin install` opens a panel where you pick the install scope. New sessions load the plugin. In a session that's already open, run `/reload-plugins`. To try it without installing, start Claude Code with `claude --plugin-dir /path/to/pstack-cc`. The [README](../../README.md#install) covers installing from a local clone, updates, and uninstalling.

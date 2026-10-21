@@ -1,5 +1,5 @@
 {
-  "name": "pstack-local",
+  "name": "pstack-cc",
   "description": "pstack ported to Claude Code: rigorous agent workflows, playbooks, and engineering principles.",
   "owner": {
     "name": "pstack"

@@ -30,11 +30,11 @@ In the original author's words, from the upstream README:
 
 ## install
 
-this repository is its own marketplace, registered as `pstack-local`. in a claude code session:
+this repository is its own marketplace, registered as `pstack-cc`. in a claude code session:
 
 ```bash
 /plugin marketplace add lyangfan/pstack-cc
-/plugin install pstack@pstack-local
+/plugin install pstack@pstack-cc
 ```
 
 `/plugin install` opens a panel where you pick the scope (you, this repository, or you in this repository only). from your shell, one command does both steps at user scope:
@@ -53,13 +53,13 @@ other ways to load it:
 **updates.** auto-update is off for third-party marketplaces. to update by hand:
 
 ```bash
-claude plugin marketplace update pstack-local
-claude plugin update pstack@pstack-local
+claude plugin marketplace update pstack-cc
+claude plugin update pstack@pstack-cc
 ```
 
-or turn on auto-update for `pstack-local` on the **Marketplaces** tab of `/plugin`. a local-clone install needs neither: it reads the files in place.
+or turn on auto-update for `pstack-cc` on the **Marketplaces** tab of `/plugin`. a local-clone install needs neither: it reads the files in place.
 
-**uninstall**: `claude plugin uninstall pstack@pstack-local`.
+**uninstall**: `claude plugin uninstall pstack@pstack-cc`.
 
 claude code prefixes plugin commands and agents, so `/poteto-mode` is `/pstack:poteto-mode` and the subagent is `pstack:poteto-agent`. the bare `/poteto-mode` also works when no other plugin uses the name. this readme writes the bare names.
 

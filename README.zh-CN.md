@@ -30,11 +30,11 @@ pstack 由 **Lauren Tan（[@poteto](https://x.com/poteto)）** 创作。原作�
 
 ## 安装
 
-这个仓库本身就是一个 marketplace，注册名是 `pstack-local`。在 Claude Code 的 session 里运行：
+这个仓库本身就是一个 marketplace，注册名是 `pstack-cc`。在 Claude Code 的 session 里运行：
 
 ```bash
 /plugin marketplace add lyangfan/pstack-cc
-/plugin install pstack@pstack-local
+/plugin install pstack@pstack-cc
 ```
 
 `/plugin install` 会打开一个面板，让你选择安装范围（只给你自己、给这个仓库的所有协作者，或者只在这个仓库里给你自己）。在 shell 里一条命令就能完成两步，默认装到用户级别：
@@ -53,13 +53,13 @@ claude plugin install pstack --marketplace lyangfan/pstack-cc
 **更新。** 第三方 marketplace 默认不自动更新。手动更新：
 
 ```bash
-claude plugin marketplace update pstack-local
-claude plugin update pstack@pstack-local
+claude plugin marketplace update pstack-cc
+claude plugin update pstack@pstack-cc
 ```
 
-也可以在 `/plugin` 的 **Marketplaces** 标签页里为 `pstack-local` 打开自动更新。从本地克隆安装的不需要这一步，它直接读取目录里的文件。
+也可以在 `/plugin` 的 **Marketplaces** 标签页里为 `pstack-cc` 打开自动更新。从本地克隆安装的不需要这一步，它直接读取目录里的文件。
 
-**卸载**：`claude plugin uninstall pstack@pstack-local`。
+**卸载**：`claude plugin uninstall pstack@pstack-cc`。
 
 Claude Code 会给插件的命令和 agent 加上前缀，所以 `/poteto-mode` 实际是 `/pstack:poteto-mode`，子代理是 `pstack:poteto-agent`。没有其他插件占用同名命令时，不带前缀的 `/poteto-mode` 也能用。本文统一写不带前缀的名字。
 

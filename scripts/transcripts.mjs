@@ -67,8 +67,7 @@ function projectSlug(path) {
   return `${slug.slice(0, 200)}-${Math.abs(hash).toString(36)}`;
 }
 
-// Claude Code names the dir after NFC(realpath(cwd)). A workspace deleted since then
-// resolves through its deepest surviving ancestor, so a symlinked parent like /tmp still maps.
+// Claude Code names the dir after NFC(realpath(cwd)).
 function canonical(path) {
   try {
     return realpathSync(path).normalize("NFC");
@@ -148,13 +147,12 @@ function summarize(all) {
 }
 
 const graphemes = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+const maxCodeUnitsPerGrapheme = 32;
 
-// One grapheme can hold any number of combining marks, so code units are capped too.
-// 32 per grapheme is double the longest standard emoji sequence.
 function truncate(text, max) {
   let count = 0;
   for (const { index, segment } of graphemes.segment(text)) {
-    if (count++ === max || index + segment.length > max * 32) return text.slice(0, index);
+    if (count++ === max || index + segment.length > max * maxCodeUnitsPerGrapheme) return text.slice(0, index);
   }
   return text;
 }

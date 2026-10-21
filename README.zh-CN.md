@@ -30,14 +30,36 @@ pstack 由 **Lauren Tan（[@poteto](https://x.com/poteto)）** 创作。原作�
 
 ## 安装
 
-这个仓库本身就是一个 marketplace。在 Claude Code 里运行：
+这个仓库本身就是一个 marketplace，注册名是 `pstack-local`。在 Claude Code 的 session 里运行：
 
 ```bash
-/plugin marketplace add /path/to/pstack
+/plugin marketplace add lyangfan/pstack-cc
 /plugin install pstack@pstack-local
 ```
 
-然后重启 Claude Code，或者运行 `/reload-plugins`。只想在一个 session 里试用、不安装的话，运行 `claude --plugin-dir /path/to/pstack`。
+`/plugin install` 会打开一个面板，让你选择安装范围（只给你自己、给这个仓库的所有协作者，或者只在这个仓库里给你自己）。在 shell 里一条命令就能完成两步，默认装到用户级别：
+
+```bash
+claude plugin install pstack --marketplace lyangfan/pstack-cc
+```
+
+新开的 session 会自动加载。已经打开的 session 里运行 `/reload-plugins`。
+
+其他加载方式：
+
+- **从本地克隆安装**，方便修改插件：`/plugin marketplace add /绝对路径/pstack-cc`，再执行同样的 install。Claude Code 会直接读取这个目录，所以你的修改在 `/reload-plugins` 之后就会生效。
+- **只在一个 session 里试用、不安装**：`claude --plugin-dir /path/to/pstack-cc`。
+
+**更新。** 第三方 marketplace 默认不自动更新。手动更新：
+
+```bash
+claude plugin marketplace update pstack-local
+claude plugin update pstack@pstack-local
+```
+
+也可以在 `/plugin` 的 **Marketplaces** 标签页里为 `pstack-local` 打开自动更新。从本地克隆安装的不需要这一步，它直接读取目录里的文件。
+
+**卸载**：`claude plugin uninstall pstack@pstack-local`。
 
 Claude Code 会给插件的命令和 agent 加上前缀，所以 `/poteto-mode` 实际是 `/pstack:poteto-mode`，子代理是 `pstack:poteto-agent`。没有其他插件占用同名命令时，不带前缀的 `/poteto-mode` 也能用。本文统一写不带前缀的名字。
 
@@ -117,7 +139,7 @@ morning.
 /output-style pstack:poteto
 ```
 
-之后每个新任务都会先加载 `poteto-mode`，压缩上下文之后也是如此；简单的提问则直接回答。按你想要的生效范围选择：
+这个 style 会让 Claude 在每个新任务开始时加载 `poteto-mode`，压缩上下文之后再加载一次；简单的提问则直接回答。按你想要的生效范围选择：
 
 | 范围 | 怎么开启 | 会写入什么 |
 |---|---|---|
@@ -139,7 +161,7 @@ alias claude-poteto="claude --settings '{\"outputStyle\":\"pstack:poteto\"}'"
 
 ## skills
 
-[`/poteto-mode`](./skills/poteto-mode/SKILL.md) 会在步骤需要时替你调用其中大部分（`how`、`why`、`architect`、`arena`、`swarm`、`interrogate`、`unslop`、`no-comments`、`technical-writing`、`tdd`，以及各条原则）。下表供你需要直接使用某个 skill 时参考：
+[`/poteto-mode`](./skills/poteto-mode/SKILL.md) 会在步骤需要时替你调用其中大部分（`how`、`why`、`architect`、`arena`、`swarm`、`interrogate`、`unslop`、`no-comments`、`technical-writing`、`tdd`，以及各条原则）。`automate-me`、`blast-radius`、`correct`、`in-your-own-words`、`poteto-help`、`recall`、`reflect`、`setup-pstack`、`sharpen` 和 `teach` 只在你手动输入时运行。下表供你需要直接使用某个 skill 时参考：
 
 ```
 /how do we cancel runs? do we have an n+1 when we look up every run to cancel?
@@ -321,6 +343,8 @@ Claude Code 本身就有 plan mode（Shift+Tab），和 pstack 配合得很好�
 | benny 自动化、`/make-bot-ui` | 已移除 | 两者都依赖 Cursor Automations 和 Grok Bot routine |
 
 ## 开发
+
+每次推送新版本，都要修改 [`.claude-plugin/plugin.json`](./.claude-plugin/plugin.json) 里的 `version`。Claude Code 会把从 git 安装的插件锁定在它的 `version` 上，版本号不变，用户就收不到新的提交。
 
 `npm test` 运行 `scripts/` 下的 node 测试套件。`skills/poteto-mode/scripts/` 下的 `.ts` 测试需要用 bun 运行（在那个目录里执行 `bun test`），所以直接在根目录运行 `node --test` 会在它们上面失败。
 

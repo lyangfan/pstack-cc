@@ -30,14 +30,36 @@ In the original author's words, from the upstream README:
 
 ## install
 
-this repository is its own marketplace. in claude code:
+this repository is its own marketplace, registered as `pstack-local`. in a claude code session:
 
 ```bash
-/plugin marketplace add /path/to/pstack
+/plugin marketplace add lyangfan/pstack-cc
 /plugin install pstack@pstack-local
 ```
 
-then restart claude code or run `/reload-plugins`. to try it for one session without installing, run `claude --plugin-dir /path/to/pstack`.
+`/plugin install` opens a panel where you pick the scope (you, this repository, or you in this repository only). from your shell, one command does both steps at user scope:
+
+```bash
+claude plugin install pstack --marketplace lyangfan/pstack-cc
+```
+
+the plugin loads in new sessions. in a session that's already open, run `/reload-plugins`.
+
+other ways to load it:
+
+- **from a local clone**, to edit the plugin: `/plugin marketplace add /absolute/path/to/pstack-cc`, then the same install. claude code reads the plugin in place, so your edits apply after `/reload-plugins`.
+- **for one session, without installing**: `claude --plugin-dir /path/to/pstack-cc`.
+
+**updates.** auto-update is off for third-party marketplaces. to update by hand:
+
+```bash
+claude plugin marketplace update pstack-local
+claude plugin update pstack@pstack-local
+```
+
+or turn on auto-update for `pstack-local` on the **Marketplaces** tab of `/plugin`. a local-clone install needs neither: it reads the files in place.
+
+**uninstall**: `claude plugin uninstall pstack@pstack-local`.
 
 claude code prefixes plugin commands and agents, so `/poteto-mode` is `/pstack:poteto-mode` and the subagent is `pstack:poteto-agent`. the bare `/poteto-mode` also works when no other plugin uses the name. this readme writes the bare names.
 
@@ -45,7 +67,7 @@ claude code prefixes plugin commands and agents, so `/poteto-mode` is `/pstack:p
 
 two steps:
 
-1. run [`/setup-pstack`](./skills/setup-pstack/SKILL.md), pick a reasoning budget, and choose which models you want.
+1. run [`/setup-pstack`](./skills/setup-pstack/SKILL.md), pick an effort budget, and choose which models you want.
 2. use [`/poteto-mode`](./skills/poteto-mode/SKILL.md) whenever you're doing anything that requires rigor.
 
 new here? the [pstack guide](./docs/guide/README.md) walks you through a first real task, from setup and prompting through verification and overnight runs. stuck, or unsure which skill fits? ask [`/poteto-help`](./skills/poteto-help/SKILL.md).
@@ -119,7 +141,7 @@ to keep [`/poteto-mode`](./skills/poteto-mode/SKILL.md) on for every task, the w
 /output-style pstack:poteto
 ```
 
-every new task then loads `poteto-mode` first, including after `/compact`, and quick questions get a direct answer. pick how long it stays on:
+the style tells claude to load `poteto-mode` at the start of each new task, and again after `/compact`, while quick questions get a direct answer. pick how long it stays on:
 
 | scope | how | what it writes |
 |---|---|---|
@@ -141,7 +163,7 @@ running it headless (`claude -p "/poteto-mode ..."`) works too. with `--output-f
 
 ## skills
 
-[`/poteto-mode`](./skills/poteto-mode/SKILL.md) runs most of these for you when a step needs them (`how`, `why`, `architect`, `arena`, `swarm`, `interrogate`, `unslop`, `no-comments`, `technical-writing`, `tdd`, and the principles). the table below is for when you want one directly:
+[`/poteto-mode`](./skills/poteto-mode/SKILL.md) runs most of these for you when a step needs them (`how`, `why`, `architect`, `arena`, `swarm`, `interrogate`, `unslop`, `no-comments`, `technical-writing`, `tdd`, and the principles). `automate-me`, `blast-radius`, `correct`, `in-your-own-words`, `poteto-help`, `recall`, `reflect`, `setup-pstack`, `sharpen`, and `teach` run only when you type them. the table below is for when you want one directly:
 
 ```
 /how do we cancel runs? do we have an n+1 when we look up every run to cancel?
@@ -324,6 +346,8 @@ what changed from the cursor version, and why:
 | benny automations, `/make-bot-ui` | removed | both depend on cursor automations and grok bot routines |
 
 ## development
+
+bump `version` in [`.claude-plugin/plugin.json`](./.claude-plugin/plugin.json) for every release you push. claude code pins a git-installed plugin to its `version`, so users don't get new commits until it changes.
 
 `npm test` runs the node test suite under `scripts/`. the `.ts` tests under `skills/poteto-mode/scripts/` need bun (`bun test` in that folder), so a bare `node --test` from the root fails on them.
 

@@ -4,14 +4,14 @@ In this page you install the plugin, pick which models pstack uses, and run your
 
 ## Install the plugin
 
-In Claude Code, add this repository as a local marketplace and install the plugin:
+In a Claude Code session, add the marketplace and install the plugin:
 
 ```text
-/plugin marketplace add /path/to/pstack
+/plugin marketplace add lyangfan/pstack-cc
 /plugin install pstack@pstack-local
 ```
 
-Restart Claude Code, or run `/reload-plugins`, so the skills and agents load. To try it without installing, start Claude Code with `claude --plugin-dir /path/to/pstack`.
+`/plugin install` opens a panel where you pick the install scope. New sessions load the plugin. In a session that's already open, run `/reload-plugins`. To try it without installing, start Claude Code with `claude --plugin-dir /path/to/pstack-cc`. The [README](../../README.md#install) covers installing from a local clone, updates, and uninstalling.
 
 Claude Code prefixes plugin commands, so `/setup-pstack` is `/pstack:setup-pstack`. The bare name also works when no other plugin uses it. This guide writes the bare names.
 

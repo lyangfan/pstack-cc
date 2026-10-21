@@ -336,6 +336,19 @@ describe("show", () => {
     assert.doesNotMatch(stdout, /Reading it now/);
   });
 
+  test("--grep matches tool input and text as written, not as rendered", () => {
+    const f = fixture();
+    writeSession(f.projectDir, "sess-a", [
+      assistant({ type: "tool_use", id: "toolu_1", name: "Bash", input: { command: 'grep -rn "TODO" src' } }),
+      assistant({ type: "tool_use", id: "toolu_2", name: "Bash", input: { command: `echo ${"x".repeat(400)} && tail-marker` } }),
+      assistant(text(`${"y".repeat(50)} late-word`)),
+    ]);
+    for (const needle of ['grep -rn "TODO"', "tail-marker", "late-word"]) {
+      const { stdout } = run(f.home, f.args("show", "sess-a", "--grep", needle, "--max-chars", "10"));
+      assert.equal(stdout.match(/^## /gm)?.length, 1, `--grep ${needle}`);
+    }
+  });
+
   test("--max-chars truncates text", () => {
     const f = fixture();
     writeSession(f.projectDir, "sess-a", [prompt("y".repeat(50))]);

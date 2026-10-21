@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { after, describe, test } from "node:test";
@@ -21,9 +21,9 @@ after(() => {
   for (const dir of roots) rmSync(dir, { recursive: true, force: true });
 });
 
-function run(home, args, extraEnv = {}) {
+function run(home, args, extraEnv = {}, cwd = undefined) {
   const env = { ...process.env, CLAUDE_CONFIG_DIR: undefined, HOME: home, ...extraEnv };
-  return spawnSync(process.execPath, [script, ...args], { env, encoding: "utf8" });
+  return spawnSync(process.execPath, [script, ...args], { env, cwd, encoding: "utf8" });
 }
 
 // Entries may be objects or raw strings (to plant malformed lines).
@@ -68,10 +68,15 @@ describe("dir", () => {
     ["/Users/test/proj", "-Users-test-proj"],
     ["/Users/test/My Project_1", "-Users-test-My-Project-1"],
     ["/Users/test/a.b@c+d", "-Users-test-a-b-c-d"],
+    ["/w/😀", "-w---"],
+    ["/w/" + "a".repeat(197), "-w-" + "a".repeat(197)],
+    ["/w/" + "a".repeat(198), "-w-" + "a".repeat(197) + "-ipsd09"],
     ["/w/" + "a".repeat(210), "-w-" + "a".repeat(197) + "-u83o13"],
+    ["/w/" + "b".repeat(210), "-w-" + "b".repeat(197) + "-u45l6h"],
   ];
+  const label = (s) => (s.length > 40 ? `${s.slice(0, 8)}… (${s.length} chars)` : s);
   for (const [path, name] of cases) {
-    test(`maps ${path.length > 40 ? `a ${path.length}-char path` : path} to ${name.length > 40 ? "a truncated hashed name" : name}`, () => {
+    test(`maps ${label(path)} to ${label(name)}`, () => {
       const home = tempDir();
       const { status, stdout } = run(home, ["dir", path]);
       assert.equal(status, 0);
@@ -81,8 +86,16 @@ describe("dir", () => {
 
   test("--workspace overrides the positional workspace", () => {
     const home = tempDir();
-    const { stdout } = run(home, ["dir", "--workspace", "/Users/test/other"]);
+    const { stdout } = run(home, ["dir", "/Users/test/proj", "--workspace", "/Users/test/other"]);
     assert.equal(stdout.trim(), join(home, ".claude", "projects", "-Users-test-other"));
+  });
+
+  test("defaults to the current directory", () => {
+    const home = tempDir();
+    const cwd = realpathSync(tempDir());
+    const fromCwd = run(home, ["dir"], {}, cwd);
+    assert.equal(fromCwd.status, 0);
+    assert.equal(fromCwd.stdout, run(home, ["dir", cwd]).stdout);
   });
 
   test("CLAUDE_CONFIG_DIR replaces ~/.claude", () => {

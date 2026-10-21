@@ -280,7 +280,7 @@ what changed from the cursor version, and why:
 | almost every skill is `disable-model-invocation: true`, and skills read each other by path | routed skills allow model invocation behind a `when_to_use` guard; principles are `user-invocable: false`; user-only skills keep `disable-model-invocation` | claude code blocks the `Skill` tool on `disable-model-invocation` skills and forbids running them another way, and such skills can't be preloaded into a subagent |
 | `Task`, `AskQuestion`, `resume` | `Agent`, `AskUserQuestion`, `SendMessage` | tool names |
 | `readonly: true` | `subagent_type: "pstack:readonly"` | a plugin agent with no edit tools. it keeps mcp tools, which cursor's readonly mode stripped |
-| cloud agents, `environment: "cloud"`, `cloud_base_branch` | `isolation: "worktree"` | subagents run locally; a restart loses running agents, not pushed branches or worktrees |
+| cloud agents, `environment: "cloud"`, `cloud_base_branch` | `isolation: "worktree"` | subagents run locally under `.claude/worktrees/`, branched from the default branch, so briefs name the branch to check out. a restart loses running agents, not pushed branches or worktrees. add `.claude/worktrees/` to `.gitignore` |
 | `claude-opus-5-5-xhigh`, `grok-4.7-xhigh-fast` slugs | `opus xhigh`, `sonnet xhigh` | claude code takes a model alias and an effort. per-agent fast mode does not exist, so `-fast` is gone |
 | `~/.cursor/rules/pstack-models.mdc` | `~/.claude/rules/pstack-models.md` | claude code loads user rules from `~/.claude/rules/` |
 | `~/.cursor/projects/<slug>/agent-transcripts/` | `~/.claude/projects/<slug>/<session>.jsonl`, read through [`scripts/transcripts.mjs`](./scripts/transcripts.mjs) | different layout and event format |

@@ -24,7 +24,7 @@ Open a todo list with one entry per phase before launching anything.
 
 ## Phase B: Fan out
 
-Spawn all N workers in one message with `subagent_type: general-purpose`, `isolation: "worktree"`, and the step 4 model, left unset for `inherit-parent`. Omit `isolation` for a worker that only reads, or one that needs the parent checkout's uncommitted state.
+Spawn all N workers in one message with `subagent_type: general-purpose`, `isolation: "worktree"`, and the step 4 model, left unset for `inherit-parent`. A worktree starts from the repository's default branch unless the user set `worktree.baseRef` to `head`, so push the branch a worker needs before you spawn it. Omit `isolation` for a worker that only reads, or one that needs the parent checkout's uncommitted state.
 
 When a worker must start from another branch, tell it to check that branch out in its worktree before any other work.
 

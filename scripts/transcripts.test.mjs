@@ -22,7 +22,7 @@ after(() => {
 });
 
 function run(home, args, extraEnv = {}, cwd = undefined) {
-  const env = { ...process.env, CLAUDE_CONFIG_DIR: undefined, HOME: home, ...extraEnv };
+  const env = { ...process.env, CLAUDE_CONFIG_DIR: undefined, CLAUDE_CODE_PROJECT_DIR_NAME: undefined, HOME: home, ...extraEnv };
   return spawnSync(process.execPath, [script, ...args], { env, cwd, encoding: "utf8" });
 }
 

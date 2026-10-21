@@ -61,9 +61,8 @@ elif raw=$(gh pr list --author "@me" --state all --limit 1000 \
 fi
 [ -s "$prs" ] || echo "[]" > "$prs"
 
-# Transcripts dir: ~/.claude/projects/<repo-path with / and . as ->.
-slug=$(printf '%s' "$main_wt" | sed 's#[/.]#-#g')
-transcripts="$HOME/.claude/projects/$slug"
+# Transcripts dir, named by the same rule Claude Code uses (scripts/transcripts.mjs owns it).
+transcripts=$(node "$(dirname "$0")/../../../scripts/transcripts.mjs" dir "$main_wt" 2>/dev/null)
 now=$(date +%s)
 
 echo "# base: $base"

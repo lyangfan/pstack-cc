@@ -169,14 +169,25 @@ function show() {
     const content = entry.message?.content;
     const parts = typeof content === "string" ? [{ type: "text", text: content }] : Array.isArray(content) ? content : [];
     const lines = [];
+    const searchable = [];
     for (const part of parts) {
-      if (part.type === "text" && part.text?.trim()) lines.push(truncate(part.text.trim(), maxChars));
-      if (part.type === "tool_use") lines.push(`→ ${part.name} ${oneLine(JSON.stringify(part.input ?? {}), 300)}`);
-      if (part.type === "tool_result" && results) lines.push(`← ${oneLine(textOf(part.content), 300)}`);
+      if (part.type === "text" && part.text?.trim()) {
+        lines.push(truncate(part.text.trim(), maxChars));
+        searchable.push(part.text);
+      }
+      if (part.type === "tool_use") {
+        lines.push(`→ ${part.name} ${oneLine(JSON.stringify(part.input ?? {}), 300)}`);
+        searchable.push(part.name, part.input);
+      }
+      if (part.type === "tool_result" && results) {
+        const result = textOf(part.content);
+        lines.push(`← ${oneLine(result, 300)}`);
+        searchable.push(result);
+      }
     }
     if (lines.length === 0) continue;
+    if (grep && !contains(searchable, grep)) continue;
     const block = lines.join("\n");
-    if (grep && !block.toLowerCase().includes(grep)) continue;
     const role = isPrompt(entry) ? "USER" : entry.type === "user" ? "tool" : "ASSISTANT";
     console.log(`\n## ${role} ${entry.timestamp ?? ""}\n${block}`);
   }

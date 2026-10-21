@@ -71,20 +71,25 @@ const configDir = (process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), ".claude")).
 const nameOverride = process.env.CLAUDE_CODE_PROJECT_DIR_NAME ?? "";
 const validName = /^[A-Za-z0-9_-]{1,64}$/.test(nameOverride) && !/^(con|prn|aux|nul|com\d|lpt\d)$/i.test(nameOverride);
 const useOverride = Boolean(process.env.CLAUDE_CONFIG_DIR) && validName;
-const projectDir = join(configDir, "projects", useOverride ? nameOverride : projectSlug(workspace));
+// New sessions go to the first dir. Claude Code still reads sessions saved under the plain slug before the override.
+const projectDirs = [...new Set([useOverride ? nameOverride : projectSlug(workspace), projectSlug(workspace)])]
+  .map((name) => join(configDir, "projects", name));
 
 function sessionFiles(includeSubagents) {
-  if (!existsSync(projectDir)) return [];
-  const top = readdirSync(projectDir)
-    .filter((name) => name.endsWith(".jsonl"))
-    .map((name) => join(projectDir, name));
-  const subagents = includeSubagents
-    ? readdirSync(projectDir)
-        .map((name) => join(projectDir, name, "subagents"))
-        .filter((dir) => existsSync(dir))
-        .flatMap((dir) => readdirSync(dir).filter((name) => name.endsWith(".jsonl")).map((name) => join(dir, name)))
-    : [];
-  return [...top, ...subagents]
+  return projectDirs
+    .filter((projectDir) => existsSync(projectDir))
+    .flatMap((projectDir) => {
+      const top = readdirSync(projectDir)
+        .filter((name) => name.endsWith(".jsonl"))
+        .map((name) => join(projectDir, name));
+      const subagents = includeSubagents
+        ? readdirSync(projectDir)
+            .map((name) => join(projectDir, name, "subagents"))
+            .filter((dir) => existsSync(dir))
+            .flatMap((dir) => readdirSync(dir).filter((name) => name.endsWith(".jsonl")).map((name) => join(dir, name)))
+        : [];
+      return [...top, ...subagents];
+    })
     .map((path) => ({ path, mtime: statSync(path).mtimeMs }))
     .sort((a, b) => b.mtime - a.mtime);
 }
@@ -144,7 +149,7 @@ function list() {
   const { days, grep } = options;
   const cutoff = Date.now() - days * 86_400_000;
   const rows = sessionFiles(options.subagents).filter(({ mtime }) => mtime >= cutoff);
-  console.log(`# ${projectDir}`);
+  for (const projectDir of projectDirs) console.log(`# ${projectDir}`);
   for (const { path, mtime } of rows) {
     const all = entries(path);
     if (grep && !contains(all, grep)) continue;
@@ -158,7 +163,7 @@ function list() {
 function locate(target) {
   if (existsSync(target)) return target;
   const match = sessionFiles(true).find(({ path }) => basename(path, ".jsonl") === target);
-  if (!match) throw new Error(`no transcript ${target} under ${projectDir}`);
+  if (!match) throw new Error(`no transcript ${target} under ${projectDirs.join(" or ")}`);
   return match.path;
 }
 
@@ -196,7 +201,7 @@ function show() {
 }
 
 try {
-  if (options.command === "dir") console.log(projectDir);
+  if (options.command === "dir") console.log(projectDirs[0]);
   else if (options.command === "list") list();
   else if (options.command === "show" && options.target) show();
   else {

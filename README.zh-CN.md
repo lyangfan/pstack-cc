@@ -133,27 +133,33 @@ morning.
 
 完整的规则和 playbook 在 [`skills/poteto-mode/SKILL.md`](./skills/poteto-mode/SKILL.md)。
 
-想让 [`/poteto-mode`](./skills/poteto-mode/SKILL.md) 对每个任务都保持开启，就像 Cursor 的 custom mode 那样，就切换到插件自带的 output style：
+### 像 Cursor 的 custom mode 一样，让整个 session 都开着 poteto-mode
+
+Cursor 的 custom mode 只对一个对话有效，直到你退出这个模式。在 Claude Code 里，对应的做法是用插件自带的 `pstack:poteto` output style 启动 session：
 
 ```bash
-/output-style pstack:poteto
+claude --settings '{"outputStyle":"pstack:poteto"}'
 ```
 
-这个 style 会让 Claude 在每个新任务开始时加载 `poteto-mode`，压缩上下文之后再加载一次；简单的提问则直接回答。按你想要的生效范围选择：
+这个 style 会让 Claude 在每个新任务开始时加载 `poteto-mode`，压缩上下文之后再加载一次；简单的提问则直接回答。它不写任何设置文件，所以下次直接运行 `claude` 启动的 session 不会开启。想退出这个模式，就退出 session，再用 `claude` 重新启动。用 `--resume` 或 `--continue` 恢复这个 session 时，要再带上这个参数。
 
-| 范围 | 怎么开启 | 会写入什么 |
-|---|---|---|
-| 只在这个 session | 用 `claude --settings '{"outputStyle":"pstack:poteto"}'` 启动 | 什么都不写。用 `--resume` 或 `--continue` 恢复时要再带上这个参数 |
-| 这个项目的所有 session | 在 session 里运行 `/output-style pstack:poteto` | 写入项目里的 `.claude/settings.local.json`，这是你本机的个人设置，通常不会提交到 git。用 `/output-style default` 撤销 |
-| 所有项目 | 在 `~/.claude/settings.json` 里设置 `"outputStyle": "pstack:poteto"` | 你的用户设置。项目自己的设置优先于它 |
-
-如果用"只在这个 session"的方式，可以设一个 shell 别名，省去每次输入：
+可以设一个 shell 别名，省去每次输入：
 
 ```bash
 alias claude-poteto="claude --settings '{\"outputStyle\":\"pstack:poteto\"}'"
 ```
 
-之后运行 `claude-poteto` 启动的 session 会开启这个模式，直接运行 `claude` 则不开启。在已经运行的 session 里，没有"只对当前 session 生效"的开关：`/output-style` 会把设置保存到项目里。不使用这个 style 时，调用一次 `/poteto-mode` 只在当前 session 内有效，`/compact` 或 `/clear` 之后要重新调用。
+之后运行 `claude-poteto` 启动的 session 会开启这个模式，直接运行 `claude` 则不开启。
+
+**已经在一个 session 里了？** Claude Code 没有"只对当前 session 生效"的开关。`/output-style` 会把设置保存到项目里，这个项目之后的 session 也都会开启。如果只想在当前 session 里用，就每个任务输入一次 `/poteto-mode <任务>`，它在 `/compact` 或 `/clear` 之前一直有效。
+
+**想在更多 session 里开启？**
+
+| 范围 | 怎么开启 | 会写入什么 |
+|---|---|---|
+| 一个 session | 用 `claude-poteto` 或上面的 `--settings` 参数启动 | 什么都不写 |
+| 这个项目的所有 session | 在 session 里运行 `/output-style pstack:poteto` | 写入项目里的 `.claude/settings.local.json`，这是你本机的个人设置，通常不会提交到 git。用 `/output-style default` 撤销 |
+| 所有项目 | 在 `~/.claude/settings.json` 里设置 `"outputStyle": "pstack:poteto"` | 你的用户设置。项目自己的设置优先于它 |
 
 [`/poteto-mode`](./skills/poteto-mode/SKILL.md) 和 Claude Code 的 `/loop` 命令配合得非常好，可以让 Claude Code 连续工作好几个小时，同时不失严谨。
 
@@ -339,7 +345,7 @@ Claude Code 本身就有 plan mode（Shift+Tab），和 pstack 配合得很好�
 | `claude-opus-5-5-xhigh`、`grok-4.7-xhigh-fast` 这类模型名 | `opus xhigh`、`sonnet xhigh` | Claude Code 用模型别名加 effort 来指定。没有按单个 agent 开启的 fast 模式，所以去掉了 `-fast` |
 | `~/.cursor/rules/pstack-models.mdc` | `~/.claude/rules/pstack-models.md` | Claude Code 从 `~/.claude/rules/` 加载用户规则 |
 | `~/.cursor/projects/<slug>/agent-transcripts/` | `~/.claude/projects/<slug>/<session>.jsonl`，通过 [`scripts/transcripts.mjs`](./scripts/transcripts.mjs) 读取 | 目录结构和事件格式都不同 |
-| custom mode（Option+Enter） | `/output-style pstack:poteto` | output style 随每次请求发送，压缩上下文后依然有效，它会让 Claude 在每个任务开始时加载 `poteto-mode` |
+| custom mode（Option+Enter），只对一个对话有效 | 用 `claude --settings '{"outputStyle":"pstack:poteto"}'` 启动 session；想让项目里的每个 session 都开启，用 `/output-style pstack:poteto` | output style 随每次请求发送，它会让 Claude 在每个任务开始时加载 `poteto-mode`。Claude Code 在已经运行的 session 里没有只对当前 session 生效的开关 |
 | benny 自动化、`/make-bot-ui` | 已移除 | 两者都依赖 Cursor Automations 和 Grok Bot routine |
 
 ## 开发

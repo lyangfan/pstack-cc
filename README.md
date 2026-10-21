@@ -135,27 +135,33 @@ when invoked it:
 
 the full rules and playbooks live in [`skills/poteto-mode/SKILL.md`](./skills/poteto-mode/SKILL.md).
 
-to keep [`/poteto-mode`](./skills/poteto-mode/SKILL.md) on for every task, the way a cursor custom mode does, switch to the bundled output style:
+### keep poteto-mode on for a whole session, like a cursor custom mode
+
+a cursor custom mode stays on for one chat until you exit it. the claude code equivalent is to start the session with the bundled `pstack:poteto` output style:
 
 ```bash
-/output-style pstack:poteto
+claude --settings '{"outputStyle":"pstack:poteto"}'
 ```
 
-the style tells claude to load `poteto-mode` at the start of each new task, and again after `/compact`, while quick questions get a direct answer. pick how long it stays on:
+the style tells claude to load `poteto-mode` at the start of each new task, and again after `/compact`, while quick questions get a direct answer. it writes nothing, so the next plain `claude` session starts without it. to leave the mode, exit and start `claude`. pass the flag again when you `--resume` or `--continue` the session.
 
-| scope | how | what it writes |
-|---|---|---|
-| this session only | start with `claude --settings '{"outputStyle":"pstack:poteto"}'` | nothing. pass the flag again on `--resume` or `--continue` |
-| every session in this project | `/output-style pstack:poteto` inside a session | `.claude/settings.local.json` in the project, which is local to you and usually not committed. undo with `/output-style default` |
-| every project | `"outputStyle": "pstack:poteto"` in `~/.claude/settings.json` | your user settings. a project's own setting wins over it |
-
-for the session-only form, a shell alias saves typing:
+a shell alias saves typing:
 
 ```bash
 alias claude-poteto="claude --settings '{\"outputStyle\":\"pstack:poteto\"}'"
 ```
 
-`claude-poteto` then starts a session with the mode on, and plain `claude` starts one without it. inside a running session there is no session-only switch: `/output-style` saves to the project. without the style, a `/poteto-mode` invocation lasts for the session, and you invoke it again after `/compact` or `/clear`.
+then `claude-poteto` starts a session with the mode on, and plain `claude` starts one without it.
+
+**already inside a session?** claude code has no session-only switch. `/output-style` saves to the project, so it turns the mode on for every later session there too. for the current session only, type `/poteto-mode <task>` for each task. it lasts until `/compact` or `/clear`.
+
+**want it on beyond one session?**
+
+| scope | how | what it writes |
+|---|---|---|
+| one session | start with `claude-poteto`, or the `--settings` flag above | nothing |
+| every session in this project | `/output-style pstack:poteto` inside a session | `.claude/settings.local.json` in the project, which is local to you and usually not committed. undo with `/output-style default` |
+| every project | `"outputStyle": "pstack:poteto"` in `~/.claude/settings.json` | your user settings. a project's own setting wins over it |
 
 [`/poteto-mode`](./skills/poteto-mode/SKILL.md) works extremely well with claude code's `/loop` command. you can make claude code work for many hours without sacrificing rigor.
 
@@ -342,7 +348,7 @@ what changed from the cursor version, and why:
 | `claude-opus-5-5-xhigh`, `grok-4.7-xhigh-fast` slugs | `opus xhigh`, `sonnet xhigh` | claude code takes a model alias and an effort. per-agent fast mode does not exist, so `-fast` is gone |
 | `~/.cursor/rules/pstack-models.mdc` | `~/.claude/rules/pstack-models.md` | claude code loads user rules from `~/.claude/rules/` |
 | `~/.cursor/projects/<slug>/agent-transcripts/` | `~/.claude/projects/<slug>/<session>.jsonl`, read through [`scripts/transcripts.mjs`](./scripts/transcripts.mjs) | different layout and event format |
-| custom mode (option+enter) | `/output-style pstack:poteto` | an output style is sent with every request, so it survives compaction, and it tells claude to load `poteto-mode` for each task |
+| custom mode (option+enter), on for one chat | start the session with `claude --settings '{"outputStyle":"pstack:poteto"}'`; `/output-style pstack:poteto` for every session in a project | an output style is sent with every request and tells claude to load `poteto-mode` for each task. claude code has no session-only switch inside a running session |
 | benny automations, `/make-bot-ui` | removed | both depend on cursor automations and grok bot routines |
 
 ## development

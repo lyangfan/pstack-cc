@@ -113,9 +113,9 @@ describe("dir", () => {
     const target = realpathSync(tempDir());
     const link = join(tempDir(), "link");
     symlinkSync(target, link);
-    const { status, stdout } = run(home, ["dir", join(link, "gone", "deeper")]);
-    assert.equal(status, 0);
-    assert.equal(stdout.trim(), join(home, ".claude", "projects", `${target}/gone/deeper`.replace(/[^a-zA-Z0-9]/g, "-")));
+    const viaLink = run(home, ["dir", join(link, "gone", "deeper")]);
+    assert.equal(viaLink.status, 0);
+    assert.equal(viaLink.stdout, run(home, ["dir", join(target, "gone", "deeper")]).stdout);
   });
 
   test("NFC-normalizes the workspace and CLAUDE_CONFIG_DIR", () => {
@@ -129,10 +129,10 @@ describe("dir", () => {
   test("NFC-normalizes an existing workspace whose name is stored decomposed", () => {
     const home = tempDir();
     const parent = realpathSync(tempDir());
-    mkdirSync(join(parent, "café"));
-    const { status, stdout } = run(home, ["dir", join(parent, "café")]);
+    mkdirSync(join(parent, "cafe\u0301"));
+    const { status, stdout } = run(home, ["dir", join(parent, "cafe\u0301")]);
     assert.equal(status, 0);
-    assert.equal(stdout.trim(), join(home, ".claude", "projects", `${parent}/café`.replace(/[^a-zA-Z0-9]/g, "-")));
+    assert.ok(stdout.trim().endsWith("-caf-"), stdout);
   });
 
   test("CLAUDE_CONFIG_DIR replaces ~/.claude", () => {
@@ -436,20 +436,14 @@ describe("show", () => {
 describe("usage errors", () => {
   function assertUsage({ status, stderr }) {
     assert.equal(status, 2);
-    assert.match(stderr, /usage/i);
+    const lines = stderr.trim().split("\n");
+    assert.ok(lines.length > 1 && !/usage/i.test(lines[0]), `expected a reason before the usage line:\n${stderr}`);
+    assert.match(lines.at(-1), /usage/i);
   }
 
   test("no arguments", () => assertUsage(run(tempDir(), [])));
   test("unknown command", () => assertUsage(run(tempDir(), ["frobnicate"])));
   test("show without an id", () => assertUsage(run(tempDir(), ["show"])));
-
-  for (const argv of [[], ["frobnicate"], ["show"]]) {
-    test(`${JSON.stringify(argv)} states a reason before the usage line`, () => {
-      const { stderr } = run(tempDir(), argv);
-      const lines = stderr.trim().split("\n");
-      assert.ok(lines.length > 1 && !/usage/i.test(lines[0]), stderr);
-    });
-  }
 
   for (const argv of [["dir", "/a", "/b"], ["list", "extra"], ["show", "sess-a", "extra"]]) {
     test(`${argv.join(" ")} rejects the extra argument`, () => {

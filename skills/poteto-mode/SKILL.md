@@ -2,6 +2,12 @@
 name: poteto-mode
 description: poteto's agent style for concise, detailed responses, deliberate subagents, unslopped prose, simple code, and verified work. Use for poteto, /poteto-mode, or requests to work in this style.
 when_to_use: "Only when the user asks for this skill by name, or a running pstack skill routes here."
+hooks:
+  PreToolUse:
+    - matcher: "Edit|Write|NotebookEdit|Agent|Task"
+      hooks:
+        - type: command
+          command: "node \"${CLAUDE_PLUGIN_ROOT}/skills/poteto-mode/scripts/checklist-gate.mjs\""
 ---
 
 # Poteto mode

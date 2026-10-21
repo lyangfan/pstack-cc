@@ -28,6 +28,8 @@ Review whether the code achieves this intent well. Do NOT question the intent it
 
 ## Instructions
 
+Budget: about 25 tool calls. Settle each claim with the cheapest check that decides it. When you reach the budget, stop and report what you have, and label any finding you could not confirm `unverified`.
+
 Review the code through every lens in the rubric and the code-quality lens above that you find relevant. Do not force lenses that don't apply. A simple bug fix does not need paragraphs about architectural integrity.
 
 For each finding, provide:

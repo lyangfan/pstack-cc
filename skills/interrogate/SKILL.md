@@ -16,7 +16,7 @@ Identify what to review from context:
 - If on a feature branch, run `git diff main...HEAD` (or the appropriate base branch) for the full changeset.
 - If the user's message references recent work, gather the relevant files.
 
-Package the diff or file contents with any surrounding context files the reviewers need to understand the code.
+Package the diff or file contents with any surrounding context files the reviewers need to understand the code. Gather the change, not the evidence. Do not investigate the code's claims yourself before the reviewers run. They do that, and you verify their findings in Step 4.
 
 ## Step 2, Intent
 

@@ -1,33 +1,31 @@
-# pstack
+# pstack for Claude Code
+
+> this is a Claude Code port of [pstack](https://github.com/cursor/plugins/tree/main/pstack) 0.15.29 by poteto. the skills, playbooks, and principles are the original's. the port changes how they run: Claude Code tools and subagents, `<model> <effort>` model roles, and Claude Code replacements for Cursor-only features. the [port notes](#port-notes) list every difference.
 
 i'm [poteto](https://x.com/poteto). i'm not a president or ceo, but i've worked with millions of lines of code at Meta, Netflix, and Cursor. i'm also on the react core team where i help build and maintain react compiler.
 
 there's a growing sense that ai writes too much slop code. i agree. i don't want to ship like a team of twenty slop artists. throughput without quality is not a goal i aspire to. if you want to go fast, go deep first. 
 
-**pstack is my answer.** these are the same skills i use every day to ship high quality code at Cursor. this turns cursor into a real engineering team. the goal is not to maximize loc, in fact it's the opposite. pstack helps you write less, but higher quality code.
+**pstack is my answer.** these are the same skills i use every day to ship high quality code at Cursor. this turns your coding agent into a real engineering team. the goal is not to maximize loc, in fact it's the opposite. pstack helps you write less, but higher quality code.
 
 **pstack gives you fearless parallelism.** when you can go deep on one agent and trust it to write good, verifiable code, you can truly parallelize with confidence. start multiple agents up with `poteto-mode` and trust that they'll apply rigorous engineering principles to their work.
 
-**cursor gives you the best of all worlds.** every frontier model has its strengths and weaknesses. use any model with pstack. in fact, many of my skills use multi-model workflows to take advantage of each model's unique strengths.
+**multi-model by design.** many of the skills run panels of different models and compare what each one catches. in this port the panels mix claude models (`opus`, `sonnet`, `fable`, `haiku`).
 
 fork it. improve it. make it yours. PRs are welcome! 
 
 ## install
 
-```bash
-/add-plugin pstack
-```
-
-in claude code:
+this repository is its own marketplace. in claude code:
 
 ```bash
-/plugin marketplace add cursor/plugins
-/plugin install pstack@cursor-plugins
+/plugin marketplace add /path/to/pstack
+/plugin install pstack@pstack-local
 ```
 
-claude code prefixes plugin commands and agents, so `/poteto-mode` is `/pstack:poteto-mode`. the [claude code adapter](./docs/harness/claude-code.md) maps every other cursor name. in claude code, `/pstack:setup-pstack` writes your model choices to `~/.claude/rules/pstack-models.md`, and a step that needs a cursor-only feature, such as bugbot or automations, is skipped with a one-line note.
+then restart claude code or run `/reload-plugins`. to try it for one session without installing, run `claude --plugin-dir /path/to/pstack`.
 
-claude code installs a generated copy of pstack, including this readme and the guide, from [`harness/pstack/`](https://github.com/cursor/plugins/tree/main/harness/pstack) at the repository root. after you change pstack, run `node scripts/generate-pstack-harness-trees.mjs` from the repository root and commit the result. ci fails while the generated copy is out of date.
+claude code prefixes plugin commands and agents, so `/poteto-mode` is `/pstack:poteto-mode` and the subagent is `pstack:poteto-agent`. the bare `/poteto-mode` also works when no other plugin uses the name. this readme writes the bare names.
 
 ## get started
 
@@ -38,13 +36,13 @@ two steps:
 
 new here? the [pstack guide](./docs/guide/README.md) walks you through a first real task, from setup and prompting through verification and overnight runs. stuck, or unsure which skill fits? ask [`/poteto-help`](./skills/poteto-help/SKILL.md).
 
-that's it. the other skills are situational, and the mode skill uses them for you as needed. out of the box the mode splits work by model strength: code delegates (feature, refactoring, bug fix, perf, hillclimb) go to grok, while the hardest changes, prose, and judgment go to opus 5.5. the default panel is opus 5.5 / grok. [`/setup-pstack`](./skills/setup-pstack/SKILL.md) changes any of it.
+that's it. the other skills are situational, and the mode skill uses them for you as needed. out of the box the mode splits work by model strength: code delegates (feature, refactoring, bug fix, perf, hillclimb) go to `sonnet xhigh`, while the hardest changes, prose, and judgment go to `opus xhigh`. the default panel is `opus xhigh` / `sonnet xhigh`. [`/setup-pstack`](./skills/setup-pstack/SKILL.md) changes any of it.
 
 ## usage
 
 use [`/poteto-mode`](./skills/poteto-mode/SKILL.md) at the start of a task. it reads your request, picks from a set of playbooks, and runs the other skills as the steps need them.
 
-pick `/poteto-mode` from the `/` menu before you type your task, so cursor attaches the skill to the message.
+type `/poteto-mode` followed by your task, so claude code loads the skill with the message.
 
 ### just use [`/poteto-mode`](./skills/poteto-mode/SKILL.md)
 
@@ -101,9 +99,9 @@ when invoked it:
 
 the full rules and playbooks live in [`skills/poteto-mode/SKILL.md`](./skills/poteto-mode/SKILL.md).
 
-to keep [`/poteto-mode`](./skills/poteto-mode/SKILL.md) on across turns, pick it from the `/` menu and press option+enter (mac) or alt+enter (windows) instead of enter. that makes it a [custom mode](https://cursor.com/docs/skills#using-a-skill-as-a-custom-mode), which cursor offers in the agents window and the cli. it stays in context every turn until you exit the mode. plain enter attaches it to one message only.
+once invoked, [`/poteto-mode`](./skills/poteto-mode/SKILL.md) stays in context for the rest of the session. after `/compact` or `/clear`, invoke it again at the start of the next task.
 
-[`/poteto-mode`](./skills/poteto-mode/SKILL.md) works extremely well with cursor's `/loop` command. you can make cursor work for many hours without sacrificing rigor.
+[`/poteto-mode`](./skills/poteto-mode/SKILL.md) works extremely well with claude code's `/loop` command. you can make claude code work for many hours without sacrificing rigor.
 
 ## skills
 
@@ -136,8 +134,7 @@ to keep [`/poteto-mode`](./skills/poteto-mode/SKILL.md) on across turns, pick it
 | [`/swarm`](./skills/swarm/SKILL.md) | you want N parallel workers across different slices or races, then one aggregated report. |
 | [`/interrogate`](./skills/interrogate/SKILL.md) | you have a diff and want different models to try to break it, including a strict code-quality lens. |
 | [`/automate-me`](./skills/automate-me/SKILL.md) | you want your own `-mode` skill, drafted from how you've actually worked. |
-| [`/make-bot-ui`](./skills/make-bot-ui/SKILL.md) | you want a page or dashboard whose buttons wake a Grok Bot over a webhook, including the sender-key handoff and Tailscale. |
-| [`/setup-pstack`](./skills/setup-pstack/SKILL.md) | you want to pick which models pstack uses per role. detects your models and writes a config rule. |
+| [`/setup-pstack`](./skills/setup-pstack/SKILL.md) | you want to pick which models pstack uses per role. reads the models the `Agent` tool accepts and writes `~/.claude/rules/pstack-models.md`. |
 | [`/reflect`](./skills/reflect/SKILL.md) | a long task landed and you want the recipe captured as a skill edit. |
 | [`/correct`](./skills/correct/SKILL.md) | you keep correcting agents for the same mistakes. mines history for mistake classes, fixes each at the highest level that works (architecture, then types, lint, and ci, then tests, with docs last), and keeps a table pairing each rule with what enforces it. |
 | [`/teach`](./skills/teach/SKILL.md) | you want to actually understand a change or subsystem, not just have it summarized. runs how + why and weaves one plain explanation, built up diagram by diagram. |
@@ -206,19 +203,19 @@ help:              /poteto-help which skill should i use to review this branch?
 
 </details>
 
-## the `poteto-agent` and Comment Sicko subagents
+## the subagents
 
 [`/poteto-mode`](./skills/poteto-mode/SKILL.md) runs in the chat that receives it. that chat owns the playbook, the todo list, and every subagent spawn.
 
-pstack also ships [`subagent_type: "poteto-agent"`](./agents/poteto-agent.md) as the wrapper for delegates spawned during a run. it reads `poteto-mode` in full, including its inline principles index, before doing any work. substituting `generalPurpose` skips that read and drifts. do not spawn `poteto-agent` to run the playbook itself.
+pstack also ships [`subagent_type: "pstack:poteto-agent"`](./agents/poteto-agent.md) as the wrapper for delegates spawned during a run. it starts with `poteto-mode` preloaded through the agent's `skills` field, including its inline principles index. substituting `general-purpose` skips that and drifts. do not spawn `pstack:poteto-agent` to run the playbook itself.
 
-[`/poteto-mode`](./skills/poteto-mode/SKILL.md) and [`subagent_type: "poteto-agent"`](./agents/poteto-agent.md) route through the same wrapper.
+[`pstack:readonly`](./agents/readonly.md) is the read-only subagent that reviewers, judges, explorers, and investigators run as. it has no edit tools, and it keeps the session's mcp tools.
 
-pstack also ships [Comment Sicko](./agents/comment-sicko.md), a read-only comment reviewer available as `subagent_type: "comment-sicko"`. usually invoke it through [`/no-comments`](./skills/no-comments/SKILL.md), not directly.
+pstack also ships [Comment Sicko](./agents/comment-sicko.md), a comment hunter available as `subagent_type: "pstack:comment-sicko"`. it deletes comments and flags code to reshape, and never writes application code. usually invoke it through [`/no-comments`](./skills/no-comments/SKILL.md), not directly.
 
 ## principles
 
-twenty-four short skills, one principle each. `poteto-mode` indexes them inline and reads that index at task start. the standalone files are there so other skills can reference a principle by name, and so the index can point at the full rule for each.
+twenty-four short skills, one principle each. `poteto-mode` indexes them inline and reads that index at task start. the standalone skills are there so other skills can load a principle by name, and so the index can point at the full rule for each. they are hidden from the `/` menu (`user-invocable: false`). name one in your prompt to steer the agent.
 
 <details>
 <summary>all twenty-four principles</summary>
@@ -254,17 +251,15 @@ twenty-four short skills, one principle each. `poteto-mode` indexes them inline 
 
 ## not shipped here
 
-a few things `poteto-mode` references but doesn't bundle:
+a few things `poteto-mode` uses but doesn't bundle:
 
-- `/deslop` and the `deslop` skill ship in the `cursor-team-kit` plugin.
-- `control-cli` (for CLIs and TUIs) and `control-ui` (for browser, Electron, web) ship in `cursor-team-kit` too.
-- `/create-skill` is a cursor built-in. cursor also ships a built-in `/autopilot` that watches a pr. inside `poteto-mode`, pr-status requests go to the [babysit playbook](./skills/poteto-mode/playbooks/babysit.md) instead.
-
-install `cursor-team-kit` alongside pstack if you want the full set.
+- `/simplify` (claude code built-in) is the pre-commit cleanup pass. the cursor version uses `/deslop` from `cursor-team-kit`.
+- driving a real surface uses the project's own `verify-*` skill when it has one, then the `claude-in-chrome` skill or a playwright mcp server for web and electron, and `tmux` for clis and tuis. the cursor version uses `control-ui` and `control-cli`.
+- authoring a skill uses the `skill-creator` skill when installed.
 
 ## why are there no planning skills?
 
-cursor already has a great plan mode which works great with pstack. but personally, i don't believe in planning. the best spec is code. if you do want to make a plan, [`/poteto-mode`](./skills/poteto-mode/SKILL.md) covers it, but it's not a default. 
+claude code already has a plan mode (shift+tab) which works great with pstack. but personally, i don't believe in planning. the best spec is code. if you do want to make a plan, [`/poteto-mode`](./skills/poteto-mode/SKILL.md) covers it, but it's not a default. 
 
 ## make it yours
 
@@ -272,15 +267,25 @@ cursor already has a great plan mode which works great with pstack. but personal
 
 type [`/automate-me`](./skills/automate-me/SKILL.md). it mines your recent transcripts, drafts a `<your-name>-mode` skill from how you've actually worked, and routes through pstack underneath. you keep pstack as the base and end up with your own routing skill alongside `poteto-mode`.
 
-models are configurable too. type [`/setup-pstack`](./skills/setup-pstack/SKILL.md). it detects the models you have access to and writes a small always-applied rule mapping each role (code, judgment, the review panels) to a model. every skill reads it and falls back to sensible defaults when the rule is absent, so you override only what you want.
+models are configurable too. type [`/setup-pstack`](./skills/setup-pstack/SKILL.md). it reads the models the `Agent` tool accepts and writes `~/.claude/rules/pstack-models.md`, a user rule claude code loads into every session, mapping each role (code, judgment, the review panels) to a model and effort. every skill reads it and falls back to sensible defaults when the rule is absent, so you override only what you want.
 
 when a default changes, a rule written before the change still pins the old default. delete those role lines, or delete the file, then run `/setup-pstack` again. a rerun keeps any role whose model differs from the default.
 
-## automations
+## port notes
 
-pstack also ships a dormant [benny automation pack](./automations/benny/). benny triages slack issue reports, then reproduces and fixes confirmed bugs with real ui evidence. its files are not registered as slash skills.
+what changed from the cursor version, and why:
 
-to set it up, point cursor at [`FOR_AGENTS.md`](./automations/benny/FOR_AGENTS.md). setup copies the pack into the target repository at `.cursor/automations/benny/`, enables pstack there for shared skills, and keeps user configuration outside the copied pack. benny runs on cursor automations, so it is cursor-only.
+| cursor | claude code | why |
+|---|---|---|
+| almost every skill is `disable-model-invocation: true`, and skills read each other by path | routed skills allow model invocation behind a `when_to_use` guard; principles are `user-invocable: false`; user-only skills keep `disable-model-invocation` | claude code blocks the `Skill` tool on `disable-model-invocation` skills and forbids running them another way, and such skills can't be preloaded into a subagent |
+| `Task`, `AskQuestion`, `resume` | `Agent`, `AskUserQuestion`, `SendMessage` | tool names |
+| `readonly: true` | `subagent_type: "pstack:readonly"` | a plugin agent with no edit tools. it keeps mcp tools, which cursor's readonly mode stripped |
+| cloud agents, `environment: "cloud"`, `cloud_base_branch` | `isolation: "worktree"` | subagents run locally; a restart loses running agents, not pushed branches or worktrees |
+| `claude-opus-5-5-xhigh`, `grok-4.7-xhigh-fast` slugs | `opus xhigh`, `sonnet xhigh` | claude code takes a model alias and an effort. per-agent fast mode does not exist, so `-fast` is gone |
+| `~/.cursor/rules/pstack-models.mdc` | `~/.claude/rules/pstack-models.md` | claude code loads user rules from `~/.claude/rules/` |
+| `~/.cursor/projects/<slug>/agent-transcripts/` | `~/.claude/projects/<slug>/<session>.jsonl`, read through [`scripts/transcripts.mjs`](./scripts/transcripts.mjs) | different layout and event format |
+| custom mode (option+enter) | invoke once per session | a loaded skill stays in context until compaction |
+| benny automations, `/make-bot-ui` | removed | both depend on cursor automations and grok bot routines |
 
 ## license
 

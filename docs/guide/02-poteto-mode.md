@@ -90,7 +90,7 @@ continue
 keep going until done
 ```
 
-Short works because the playbook holds the structure, and a Custom Mode keeps `/poteto-mode` in context on every turn. [Set up pstack](./01-setup.md#run-your-first-task) shows how to start one. Your words carry the intent, and the skill carries the rigor.
+Short works because the playbook holds the structure, and `/poteto-mode` stays in context for the rest of the session once invoked. [Set up pstack](./01-setup.md#run-your-first-task) shows how to start one. Your words carry the intent, and the skill carries the rigor.
 
 ## Switch tasks with "new task"
 
@@ -104,9 +104,9 @@ A long chat accumulates context from the last task. When you change subjects, sa
 
 ## Give parallel work its own machine
 
-If you run several agents against one repository on one computer, they will fight over the working tree, the ports, and the build output. The cleanest isolation is a [cloud subagent](https://cursor.com/docs/subagents#cloud-subagents). Each one gets its own VM and branch, so it can install dependencies, run your app, and record video of the result without touching your machine. Type `/in-cloud` before the task, or ask the parent chat to hand work to cloud subagents.
+If you run several agents against one repository on one computer, they will fight over the working tree, the ports, and the build output. In Claude Code the isolation is a git worktree: a subagent spawned with `isolation: "worktree"` gets its own checkout and branch, and the swarm, autopilot, and shipping playbooks already ask for one. Ports and other machine state are still shared, so give each worker its own port range in the brief.
 
-When the work has to stay local, ask for a worktree up front:
+For your own task, ask for a worktree up front:
 
 ```text
 /poteto-mode new task. branch off <base> in a fresh worktree, then port the parser change there.

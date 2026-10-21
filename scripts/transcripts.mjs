@@ -67,7 +67,8 @@ const workspace = canonical(resolve(options.workspace));
 const configDir = (process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), ".claude")).normalize("NFC");
 // Claude Code honors this override only under a custom config dir, and skips names unsafe as a dir on Windows.
 const nameOverride = process.env.CLAUDE_CODE_PROJECT_DIR_NAME ?? "";
-const useOverride = Boolean(process.env.CLAUDE_CONFIG_DIR) && /^[A-Za-z0-9_-]{1,64}$/.test(nameOverride) && !/^(con|prn|aux|nul|com\d|lpt\d)$/i.test(nameOverride);
+const validName = /^[A-Za-z0-9_-]{1,64}$/.test(nameOverride) && !/^(con|prn|aux|nul|com\d|lpt\d)$/i.test(nameOverride);
+const useOverride = Boolean(process.env.CLAUDE_CONFIG_DIR) && validName;
 const projectDir = join(configDir, "projects", useOverride ? nameOverride : projectSlug(workspace));
 
 function sessionFiles(includeSubagents) {

@@ -206,6 +206,17 @@ describe("list", () => {
     assert.doesNotMatch(stdout, /sess-other/);
   });
 
+  test("--grep matches text containing double quotes and backslashes", () => {
+    const f = fixture();
+    writeSession(f.projectDir, "sess-quoted", [prompt('run grep "TODO" in C:\\src')]);
+    writeSession(f.projectDir, "sess-other", [prompt("rename a variable")]);
+    for (const needle of ['grep "TODO"', "C:\\src", '"todo" in c:\\']) {
+      const { stdout } = run(f.home, f.args("list", "--grep", needle));
+      assert.match(stdout, /sess-quoted/, `--grep ${needle}`);
+      assert.doesNotMatch(stdout, /sess-other/, `--grep ${needle}`);
+    }
+  });
+
   test("subagent transcripts appear only with --subagents", () => {
     const f = fixture();
     writeSession(f.projectDir, "sess-main", [prompt("main task")]);

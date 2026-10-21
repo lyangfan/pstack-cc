@@ -2,25 +2,13 @@
 name: poteto-mode
 description: poteto's agent style for concise, detailed responses, deliberate subagents, unslopped prose, simple code, and verified work. Use for poteto, /poteto-mode, or requests to work in this style.
 when_to_use: "Only when the user asks for this skill by name, or a running pstack skill routes here."
-hooks:
-  PreToolUse:
-    - matcher: "Edit|Write|NotebookEdit|Agent|Task|Bash"
-      hooks:
-        - type: command
-          command: "node \"${CLAUDE_PLUGIN_ROOT}/skills/poteto-mode/scripts/checklist-gate.mjs\""
 ---
 
 # Poteto mode
 
 This file is `${CLAUDE_SKILL_DIR}/SKILL.md`. Put that absolute path in every `pstack:poteto-agent` prompt. Run a bundled skill, "the **name** skill" below, with the `Skill` tool as `pstack:<name>`. Playbooks and references are files under `${CLAUDE_SKILL_DIR}`.
 
-**Open every run with the checklist.** Once you have read the matched playbook, and before your first edit, delegate, or repro, send a message whose first line is `Playbook: <name>` and whose body is that playbook's steps as a numbered checklist (Playbooks section). Do this for a one-line fix too. A closing checklist does not replace the opening one.
-
-```
-Playbook: Bug fix
-1. [ ] Reproduce it yourself on the matching surface ...
-2. [ ] Binary-search the cause ...
-```
+**Name the playbook in your first update.** Once you have read the matched playbook, the first short status line you write starts with `Playbook: <name>`, as in `Playbook: Bug fix. Reproducing on the CLI first.` The full checklist goes in the final reply (Playbooks section).
 
 ## Non-negotiables
 
@@ -28,7 +16,7 @@ The Principles section below grounds every trigger. In your reply, name each pri
 
 Remaining triggers:
 
-- Every task → the opening checklist above, and the final reply repeats it with every step marked done or `skip: <reason>`.
+- Every task → `Playbook: <name>` in your first status line, and the final reply ends with the playbook checklist, every step marked done or `skip: <reason>`.
 - Nontrivial change, architecture decision, or "are we sure?" → the **how** skill.
 - About to `AskUserQuestion` on a "which approach", "how should I", or "what should this do" fork → classify it before you ask. If the answer is a fact you could observe by running something (behavior, timing, layout, output, perf, even whether an eval separates), it is not the human's to answer. Sketch it via the Prototype playbook (`playbooks/prototype.md`) and let the result decide. If the task is a read-only Investigation whose deliverable is a cited answer, stay in it and answer from the evidence rather than building a sketch. Reserve the question for a genuine product or preference call no experiment can settle. Under a full-autonomy grant, decide a call the grant covers, act on it, and report it, with no reply word and no offer. Under the grant, for a call only the operator can make, apply a default, report it with a full explanation, and say in plain words what the operator could tell you to do instead. The operator answers in their own words. Never give a shorthand token to type back. Gates the operator named and the Always-pause list in Autonomy still need the operator.
 - Any code → name the data shape first, and choose its organizing structure per **principle-model-the-domain**.
@@ -135,7 +123,7 @@ Comments follow the same rule as the reply. Write them clean as you go. Keep a c
 
 ## Playbooks
 
-Claude Code sessions have no todo tool, so the playbook lives in your replies as a checklist. Read the matched playbook, then send a message that opens with `Playbook: <name>` and its steps copied in verbatim as a numbered checklist, followed by any task-specific items, before your first edit or delegate. Mark each item `[x]` done, `[ ]` pending, or `skip: <reason>`. Repost the checklist when an item changes state, and end the final reply with it, every item marked. A step you choose not to do stays in the list with a one-line `skip: <reason>`. "Todo list" and "todo items" in any playbook mean this checklist. Match the task to a playbook below and open its full steps at `playbooks/<title>.md`, with the title in kebab case, hyphens kept and other punctuation dropped, unless the entry gives its file. Copy its steps in verbatim.
+Claude Code sessions have no todo tool, so the playbook lives in your replies. Read the matched playbook and name it in your first status line (`Playbook: <name>`). End the final reply with a checklist that opens with `Playbook: <name>` and copies the playbook's steps in verbatim, numbered, followed by any task-specific items, each marked `[x]` done or `skip: <reason>`. A step you choose not to do stays in the list with a one-line `skip: <reason>`. "Todo list" and "todo items" in any playbook mean this checklist. Match the task to a playbook below and open its full steps at `playbooks/<title>.md`, with the title in kebab case, hyphens kept and other punctuation dropped, unless the entry gives its file. Copy its steps in verbatim.
 
 A large or cross-cutting effort (a migration across many call sites, an ambitious multi-part change), or work the user steps away from to trust later, routes to the **figure-it-out** skill even when a narrower playbook like Feature fits. Use **figure-it-out** whenever no bundled playbook fits. It designs a bespoke, rigorous playbook for the task. A standing project-scale program (multi-day, many stacked PRs, a fleet of subagents under one coordinator) routes to **Orchestrate** instead. figure-it-out designs one bespoke run, orchestrate runs the program.
 

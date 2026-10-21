@@ -35,7 +35,7 @@ You don't write a spec. You say what's wrong or what you want, plus anything you
 /poteto-mode users get two notifications after a retry. repro first, then fix and verify.
 ```
 
-That's a Bug fix prompt. "repro first" is a real constraint, not politeness, and the playbook honors it. Watch for the `Playbook: Bug fix` checklist in its first message. A skipped step stays visible with `skip: <reason>`.
+That's a Bug fix prompt. "repro first" is a real constraint, not politeness, and the playbook honors it. Watch for `Playbook: Bug fix` in its first status line, and the Bug fix checklist at the end of its reply. A skipped step stays visible with `skip: <reason>`.
 
 ## What goes in a prompt
 

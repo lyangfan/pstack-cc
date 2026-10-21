@@ -93,7 +93,7 @@ morning.
 
 when invoked it:
 
-1. matches your task to a [playbook](./skills/poteto-mode/playbooks/) and posts its steps, copied in verbatim, as a checklist in the reply. the final reply marks every step done or `skip: <reason>`.
+1. matches your task to a [playbook](./skills/poteto-mode/playbooks/) and names it in its first status line. the final reply ends with the playbook's steps, copied in verbatim, as a checklist with every step marked done or `skip: <reason>`.
 2. routes to the other skills as the steps fire.
 3. writes unslopped replies framed for the consumer and the maintainer.
 
@@ -291,7 +291,7 @@ what changed from the cursor version, and why:
 
 ## development
 
-`npm test` runs the node test suites under `scripts/` and the poteto-mode checklist gate. the `.ts` tests under `skills/poteto-mode/scripts/` need bun (`bun test` in that folder), so a bare `node --test` from the root fails on them.
+`npm test` runs the node test suite under `scripts/`. the `.ts` tests under `skills/poteto-mode/scripts/` need bun (`bun test` in that folder), so a bare `node --test` from the root fails on them.
 
 ## license
 

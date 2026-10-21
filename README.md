@@ -1,18 +1,32 @@
 # pstack for Claude Code
 
-> this is a Claude Code port of [pstack](https://github.com/cursor/plugins/tree/main/pstack) 0.15.29 by poteto. the skills, playbooks, and principles are the original's. the port changes how they run: Claude Code tools and subagents, `<model> <effort>` model roles, and Claude Code replacements for Cursor-only features. the [port notes](#port-notes) list every difference.
+**English** | [简体中文](./README.zh-CN.md)
 
-i'm [poteto](https://x.com/poteto). i'm not a president or ceo, but i've worked with millions of lines of code at Meta, Netflix, and Cursor. i'm also on the react core team where i help build and maintain react compiler.
+A Claude Code port of [pstack](https://github.com/cursor/plugins/tree/main/pstack), the Cursor plugin by [poteto](https://x.com/poteto). The skills, playbooks, and principles are the original's. The port changes how they run: Claude Code tools and subagents, `<model> <effort>` model roles, and Claude Code replacements for Cursor-only features. The [port notes](#port-notes) list every difference.
 
-there's a growing sense that ai writes too much slop code. i agree. i don't want to ship like a team of twenty slop artists. throughput without quality is not a goal i aspire to. if you want to go fast, go deep first. 
+## credits
 
-**pstack is my answer.** these are the same skills i use every day to ship high quality code at Cursor. this turns your coding agent into a real engineering team. the goal is not to maximize loc, in fact it's the opposite. pstack helps you write less, but higher quality code.
+pstack was created by **Lauren Tan ([@poteto](https://x.com/poteto))**, who works on the React core team and at Cursor.
 
-**pstack gives you fearless parallelism.** when you can go deep on one agent and trust it to write good, verifiable code, you can truly parallelize with confidence. start multiple agents up with `poteto-mode` and trust that they'll apply rigorous engineering principles to their work.
+- Original project: <https://github.com/cursor/plugins/tree/main/pstack>
+- This port starts from pstack 0.15.29, commit [`190d287`](https://github.com/cursor/plugins/tree/190d28736eff128ec94f502a22c7fe0c4b56cd37/pstack).
+- License: MIT, copyright (c) 2026 Lauren Tan. See [LICENSE](./LICENSE).
 
-**multi-model by design.** many of the skills run panels of different models and compare what each one catches. in this port the panels mix claude models (`opus`, `sonnet`, `fable`, `haiku`).
+Thank you to poteto for designing pstack and sharing it openly. The playbooks, the principles, and the rigor behind them are all the original author's work. This repository only adapts them to Claude Code. Problems with the port belong here, not upstream. For the Cursor version, go to the original project.
 
-fork it. improve it. make it yours. PRs are welcome! 
+## why pstack
+
+In the original author's words, from the upstream README:
+
+> there's a growing sense that ai writes too much slop code. i agree. i don't want to ship like a team of twenty slop artists. throughput without quality is not a goal i aspire to. if you want to go fast, go deep first.
+>
+> **pstack is my answer.** these are the same skills i use every day to ship high quality code at Cursor. this turns cursor into a real engineering team. the goal is not to maximize loc, in fact it's the opposite. pstack helps you write less, but higher quality code.
+>
+> **pstack gives you fearless parallelism.** when you can go deep on one agent and trust it to write good, verifiable code, you can truly parallelize with confidence. start multiple agents up with `poteto-mode` and trust that they'll apply rigorous engineering principles to their work.
+>
+> fork it. improve it. make it yours. PRs are welcome!
+
+**Multi-model by design.** Many of the skills run panels of different models and compare what each one catches. In this port the panels mix Claude models (`opus`, `sonnet`, `fable`, `haiku`).
 
 ## install
 
@@ -46,7 +60,7 @@ type `/poteto-mode` followed by your task, so claude code loads the skill with t
 
 ### just use [`/poteto-mode`](./skills/poteto-mode/SKILL.md)
 
-this skill is the main shortcut. i use it whenever i need the agent to do rigorous engineering work. it comes with twenty-three playbooks:
+this skill is the main shortcut. use it whenever you need the agent to do rigorous engineering work. it comes with twenty-three playbooks:
 
 ```
 /poteto-mode this pr has a subtle bug where the scroll drifts every 750ms even when idle. repro
@@ -180,7 +194,7 @@ running it headless (`claude -p "/poteto-mode ..."`) works too. with `--output-f
 
 ### examples
 
-mostly i type [`/poteto-mode`](./skills/poteto-mode/SKILL.md) at the start of a task and let it route to a playbook. the other skills fire as the steps need them. a few i reach for directly.
+most of the time, type [`/poteto-mode`](./skills/poteto-mode/SKILL.md) at the start of a task and let it route to a playbook. the other skills fire as the steps need them. a few are worth reaching for directly.
 
 
 <details>
@@ -281,11 +295,11 @@ a few things `poteto-mode` uses but doesn't bundle:
 
 ## why are there no planning skills?
 
-claude code already has a plan mode (shift+tab) which works great with pstack. but personally, i don't believe in planning. the best spec is code. if you do want to make a plan, [`/poteto-mode`](./skills/poteto-mode/SKILL.md) covers it, but it's not a default. 
+claude code already has a plan mode (shift+tab) which works great with pstack. the original author's position is that the best spec is code, so planning is not a default. if you do want to make a plan, [`/poteto-mode`](./skills/poteto-mode/SKILL.md) covers it, but it's not a default. 
 
 ## make it yours
 
-`poteto-mode` is my style. you may not want exactly that.
+`poteto-mode` is poteto's style. you may not want exactly that.
 
 type [`/automate-me`](./skills/automate-me/SKILL.md). it mines your recent transcripts, drafts a `<your-name>-mode` skill from how you've actually worked, and routes through pstack underneath. you keep pstack as the base and end up with your own routing skill alongside `poteto-mode`.
 
@@ -315,4 +329,4 @@ what changed from the cursor version, and why:
 
 ## license
 
-MIT
+MIT. Copyright (c) 2026 Lauren Tan, the original author of pstack. The Claude Code port is released under the same license. See [LICENSE](./LICENSE).

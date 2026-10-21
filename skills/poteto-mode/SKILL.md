@@ -1,9 +1,7 @@
 ---
 name: poteto-mode
 description: poteto's agent style for concise, detailed responses, deliberate subagents, unslopped prose, simple code, and verified work. Use for poteto, /poteto-mode, or requests to work in this style.
-disable-model-invocation: true
-icon: crown
-color: yellow
+when_to_use: "Only when the user asks for this skill by name, or a running pstack skill routes here."
 ---
 
 # Poteto mode

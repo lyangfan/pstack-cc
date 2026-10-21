@@ -2,7 +2,7 @@
 name: typescript-best-practices
 description: TypeScript best practices. Use when reading or editing any .ts or .tsx file.
 paths: ["**/*.ts", "**/*.tsx"]
-disable-model-invocation: true
+when_to_use: "Only when the user asks for this skill by name, or a running pstack skill routes here."
 ---
 
 # TypeScript best practices

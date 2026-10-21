@@ -1,7 +1,7 @@
 ---
 name: unslop
 description: Cut AI tells from any writing.
-disable-model-invocation: true
+when_to_use: "Only when the user asks for this skill by name, or a running pstack skill routes here."
 ---
 
 # Unslop

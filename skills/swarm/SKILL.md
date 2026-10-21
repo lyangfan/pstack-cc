@@ -1,7 +1,7 @@
 ---
 name: swarm
 description: "Fan out N parallel workers, drain them, and return one report. Use for /swarm, 'swarm this', or parallel coverage, races, gauntlets, and exploration."
-disable-model-invocation: true
+when_to_use: "Only when the user asks for this skill by name, or a running pstack skill routes here."
 ---
 
 # Swarm

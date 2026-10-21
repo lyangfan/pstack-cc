@@ -1,7 +1,7 @@
 ---
 name: benchmark-checklist
 description: "Vet a perf measurement (limiter, tuning, limits, errors, repeatability, relevance, and whether the work happened) before you report or act on it. Use when you run a benchmark or report a speedup or regression you measured."
-disable-model-invocation: true
+when_to_use: "Only when the user asks for this skill by name, or a running pstack skill routes here."
 ---
 
 # Benchmark checklist

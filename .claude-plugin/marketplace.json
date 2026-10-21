@@ -1,0 +1,13 @@
+{
+  "name": "pstack-local",
+  "owner": {
+    "name": "pstack"
+  },
+  "plugins": [
+    {
+      "name": "pstack",
+      "source": "./",
+      "description": "pstack for Claude Code: rigorous agent workflows, playbooks, and engineering principles."
+    }
+  ]
+}

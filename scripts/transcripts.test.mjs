@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, utimesSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { after, describe, test } from "node:test";
@@ -96,6 +96,24 @@ describe("dir", () => {
     const fromCwd = run(home, ["dir"], {}, cwd);
     assert.equal(fromCwd.status, 0);
     assert.equal(fromCwd.stdout, run(home, ["dir", cwd]).stdout);
+  });
+
+  test("resolves a symlinked workspace to its target", () => {
+    const home = tempDir();
+    const target = realpathSync(tempDir());
+    const link = join(tempDir(), "link");
+    symlinkSync(target, link);
+    const viaLink = run(home, ["dir", link]);
+    assert.equal(viaLink.status, 0);
+    assert.equal(viaLink.stdout, run(home, ["dir", target]).stdout);
+  });
+
+  test("NFC-normalizes the workspace and CLAUDE_CONFIG_DIR", () => {
+    const home = tempDir();
+    const config = tempDir();
+    const decomposed = "cafe\u0301";
+    const { stdout } = run(home, ["dir", `/w/${decomposed}`], { CLAUDE_CONFIG_DIR: join(config, decomposed) });
+    assert.equal(stdout.trim(), join(config, "caf\u00e9", "projects", "-w-caf-"));
   });
 
   test("CLAUDE_CONFIG_DIR replaces ~/.claude", () => {

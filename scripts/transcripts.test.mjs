@@ -434,6 +434,25 @@ describe("usage errors", () => {
   test("unknown command", () => assertUsage(run(tempDir(), ["frobnicate"])));
   test("show without an id", () => assertUsage(run(tempDir(), ["show"])));
 
+  for (const argv of [[], ["frobnicate"], ["show"]]) {
+    test(`${JSON.stringify(argv)} states a reason before the usage line`, () => {
+      const { stderr } = run(tempDir(), argv);
+      const lines = stderr.trim().split("\n");
+      assert.ok(lines.length > 1 && !/usage/i.test(lines[0]), stderr);
+    });
+  }
+
+  for (const argv of [["dir", "/a", "/b"], ["list", "extra"], ["show", "sess-a", "extra"]]) {
+    test(`${argv.join(" ")} rejects the extra argument`, () => {
+      const f = fixture();
+      writeSession(f.projectDir, "sess-a", [prompt("hi")]);
+      const result = run(f.home, f.args(...argv));
+      assertUsage(result);
+      assert.equal(result.stdout, "");
+      assert.ok(result.stderr.includes(argv.at(-1)), result.stderr);
+    });
+  }
+
   test("list --days abc", () => {
     const f = fixture();
     writeSession(f.projectDir, "sess-a", [prompt("hi")]);

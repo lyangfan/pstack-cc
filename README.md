@@ -291,7 +291,7 @@ what changed from the cursor version, and why:
 
 ## development
 
-`npm test` runs the node test suite under `scripts/`. the `.ts` tests under `skills/poteto-mode/scripts/` need bun (`bun test` in that folder), so a bare `node --test` from the root fails on them.
+`npm test` runs the node test suites under `scripts/` and the poteto-mode checklist gate. the `.ts` tests under `skills/poteto-mode/scripts/` need bun (`bun test` in that folder), so a bare `node --test` from the root fails on them.
 
 ## license
 

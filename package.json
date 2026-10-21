@@ -1,6 +1,6 @@
 {
   "private": true,
   "scripts": {
-    "test": "node --test scripts"
+    "test": "node --test scripts skills/poteto-mode/scripts/checklist-gate.test.mjs"
   }
 }

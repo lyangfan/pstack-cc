@@ -4,7 +4,7 @@ description: poteto's agent style for concise, detailed responses, deliberate su
 when_to_use: "Only when the user asks for this skill by name, or a running pstack skill routes here."
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write|NotebookEdit|Agent|Task"
+    - matcher: "Edit|Write|NotebookEdit|Agent|Task|Bash"
       hooks:
         - type: command
           command: "node \"${CLAUDE_PLUGIN_ROOT}/skills/poteto-mode/scripts/checklist-gate.mjs\""

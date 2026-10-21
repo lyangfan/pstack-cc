@@ -53,7 +53,7 @@ Other tools can read the skills, because they use the Agent Skills format. But m
 
 Whether `/poteto-mode` stays on depends on how the user starts it:
 
-- `/output-style pstack:poteto` keeps it on, like a Cursor custom mode. Every new task loads `poteto-mode` first, even after `/compact`, and the choice is saved for the project until `/output-style default`. `"outputStyle": "pstack:poteto"` in `~/.claude/settings.json` turns it on in every project.
+- `/output-style pstack:poteto` keeps it on, like a Cursor custom mode. Every new task loads `poteto-mode` first, even after `/compact`, and the choice is saved for the project until `/output-style default`. `"outputStyle": "pstack:poteto"` in `~/.claude/settings.json` turns it on in every project. For one session only, start with `claude --settings '{"outputStyle":"pstack:poteto"}'`, which writes nothing; a running session has no session-only switch.
 - Without the style, `/pstack:poteto-mode <task>` loads the skill for that session only. After `/compact` or `/clear`, invoke it again.
 
 Link [Claude Code's skills docs](https://code.claude.com/docs/en/skills) when this comes up. Mid-chat, "new task" makes the mode match a fresh playbook. `/poteto-mode` already uses `pstack:poteto-agent` for the subagents its playbook steps spawn. To get the same style from a subagent of your own, spawn it with `subagent_type: "pstack:poteto-agent"`.

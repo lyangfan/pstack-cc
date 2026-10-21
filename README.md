@@ -105,7 +105,21 @@ to keep [`/poteto-mode`](./skills/poteto-mode/SKILL.md) on for every task, the w
 /output-style pstack:poteto
 ```
 
-every new task then loads `poteto-mode` first, including after `/compact`, and quick questions get a direct answer. the choice is saved in `.claude/settings.local.json`, so it stays on in that project until you run `/output-style default`. to turn it on in every project, set `"outputStyle": "pstack:poteto"` in `~/.claude/settings.json`. without the style, a `/poteto-mode` invocation lasts for the session, and you invoke it again after `/compact` or `/clear`.
+every new task then loads `poteto-mode` first, including after `/compact`, and quick questions get a direct answer. pick how long it stays on:
+
+| scope | how | what it writes |
+|---|---|---|
+| this session only | start with `claude --settings '{"outputStyle":"pstack:poteto"}'` | nothing. pass the flag again on `--resume` or `--continue` |
+| every session in this project | `/output-style pstack:poteto` inside a session | `.claude/settings.local.json` in the project, which is local to you and usually not committed. undo with `/output-style default` |
+| every project | `"outputStyle": "pstack:poteto"` in `~/.claude/settings.json` | your user settings. a project's own setting wins over it |
+
+for the session-only form, a shell alias saves typing:
+
+```bash
+alias claude-poteto="claude --settings '{\"outputStyle\":\"pstack:poteto\"}'"
+```
+
+`claude-poteto` then starts a session with the mode on, and plain `claude` starts one without it. inside a running session there is no session-only switch: `/output-style` saves to the project. without the style, a `/poteto-mode` invocation lasts for the session, and you invoke it again after `/compact` or `/clear`.
 
 [`/poteto-mode`](./skills/poteto-mode/SKILL.md) works extremely well with claude code's `/loop` command. you can make claude code work for many hours without sacrificing rigor.
 

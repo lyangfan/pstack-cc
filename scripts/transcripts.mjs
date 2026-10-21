@@ -133,9 +133,13 @@ function summarize(all) {
 
 const graphemes = new Intl.Segmenter(undefined, { granularity: "grapheme" });
 
+// One grapheme can hold any number of combining marks, so code units are capped too.
+// 32 per grapheme is double the longest standard emoji sequence.
 function truncate(text, max) {
   let count = 0;
-  for (const { index } of graphemes.segment(text)) if (count++ === max) return text.slice(0, index);
+  for (const { index, segment } of graphemes.segment(text)) {
+    if (count++ === max || index + segment.length > max * 32) return text.slice(0, index);
+  }
   return text;
 }
 

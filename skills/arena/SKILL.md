@@ -6,7 +6,7 @@ when_to_use: "Only when the user asks for this skill by name, or a running pstac
 
 # Arena
 
-Post a checklist in your reply with one entry per phase (Frame, Fan out, Cross-judge, Pick, Graft, Verify) before launching anything, and repost it as phases finish.
+Track one item per phase (Frame, Fan out, Cross-judge, Pick, Graft, Verify) before launching anything. If `TaskCreate` is in your tools or the deferred tool list, load it with `ToolSearch`, create one task per phase, and set each `completed` as its phase finishes. Otherwise name the current phase in each status line and end the final reply with the phases as a checklist, each marked `[x]` done or `skip: <reason>`.
 
 ## Phase A: Frame
 

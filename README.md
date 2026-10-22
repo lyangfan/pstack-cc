@@ -129,7 +129,7 @@ morning.
 
 when invoked it:
 
-1. matches your task to a [playbook](./skills/poteto-mode/playbooks/) and names it in its first status line. the final reply ends with the playbook's steps, copied in verbatim, as a checklist with every step marked done or `skip: <reason>`.
+1. matches your task to a [playbook](./skills/poteto-mode/playbooks/) and names it in its first status line. with Claude Code's task tools on (`/setup-pstack` offers to turn them on), each step becomes a task you can watch. the final reply ends with the playbook's steps, copied in verbatim, as a checklist with every step marked done or `skip: <reason>`.
 2. routes to the other skills as the steps fire.
 3. writes unslopped replies framed for the consumer and the maintainer.
 

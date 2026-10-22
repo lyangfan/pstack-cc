@@ -10,7 +10,7 @@ Sketch types, function signatures, class shapes, and module boundaries with `not
 
 ## Start
 
-Post a checklist in your reply with one entry per phase before starting, and repost it as phases finish.
+Track one item per phase before starting. If `TaskCreate` is in your tools or the deferred tool list, load it with `ToolSearch`, create one task per phase, and set each `completed` as its phase finishes. Otherwise name the current phase in each status line and end the final reply with the phases as a checklist, each marked `[x]` done or `skip: <reason>`.
 
 1. Ground
 2. Sketch

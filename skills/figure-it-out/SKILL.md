@@ -10,7 +10,7 @@ When the task matches no playbook, design one. The deliverable before any code i
 
 ## Start
 
-Post a checklist in your reply whose first item is to read the Principles section of the **poteto-mode** skill. Then add the phases below as items, and repost it as items change.
+Track a list whose first item is to read the Principles section of the **poteto-mode** skill, then one item per phase below. If `TaskCreate` is in your tools or the deferred tool list, load it with `ToolSearch`, create the items as tasks, and set each `completed` as it finishes. Otherwise name the current item in each status line and end the final reply with the list as a checklist, each item marked `[x]` done or `skip: <reason>`.
 
 ## Phase A: Frame
 
@@ -31,7 +31,7 @@ Decompose into atomic, independently-landable units. Sequence riskiest-unknown-f
 - Decide what fans out. Parallelize only across seams, and give each worker its own worktree or branch (the **separate-before-serializing-shared-state** principle skill). Don't over-fan. Pick each subagent's effort for the job, per the Subagents section of the **poteto-mode** skill.
 - Write the designed phase list down. That list is what the human reviews.
 
-Then execute the design. Add its steps to the checklist as concrete items between the Phase C and Phase D entries. Run each under the Phase C loop discipline, and weave the Phase D log through them, a row as each step lands, rather than saving the whole trail for the end.
+Then execute the design. Add its steps to the list as concrete items. As tasks, make the Phase D task `addBlockedBy` them. In a checklist, place them between the Phase C and Phase D entries. Run each under the Phase C loop discipline, and weave the Phase D log through them, a row as each step lands, rather than saving the whole trail for the end.
 
 ## Phase C: Run the loop
 

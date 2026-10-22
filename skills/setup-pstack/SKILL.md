@@ -1,6 +1,6 @@
 ---
 name: setup-pstack
-description: Configure which models pstack uses per role and at what effort budget. Detects the models the Agent tool accepts and writes a user rule that overrides the skill defaults. Use for /setup-pstack, "configure pstack models", "pstack budget", or changing pstack's model choices.
+description: Configure which models pstack uses per role and at what effort budget. Detects the models the Agent tool accepts and writes a user rule that overrides the skill defaults. Also offers to turn on Claude Code's task tools for playbook tracking. Use for /setup-pstack, "configure pstack models", "pstack budget", or changing pstack's model choices.
 disable-model-invocation: true
 ---
 
@@ -62,14 +62,20 @@ architect runners: opus xhigh, sonnet xhigh
 interrogate reviewers: opus xhigh, sonnet xhigh
 ```
 
-### 6. Confirm
+### 6. Offer the task tools
 
-Tell the user the rule was written and that it applies to new sessions. Re-running this skill updates it.
+pstack skills track playbook steps and phases in Claude Code's task tools (`TaskCreate`, `TaskUpdate`, `TaskList`) when a session has them. Claude Code turns them on by default only for older models. For current models, the `CLAUDE_CODE_ENABLE_TODO_TOOLS` environment variable turns them on. Without them, skills fall back to a checklist in the final reply.
 
-### 7. Offer a verification skill (optional)
+Read `~/.claude/settings.json`. If its `env` already sets `CLAUDE_CODE_ENABLE_TODO_TOOLS` to `"1"`, skip this step. Otherwise ask once with `AskUserQuestion`: turn on the task tools, so playbook steps show as a live task list, or keep the reply checklist. Say that the variable is undocumented and a later Claude Code release may rename or drop it. On yes, set `env.CLAUDE_CODE_ENABLE_TODO_TOOLS` to `"1"` in that file, keep every other key, and create the file if it is missing. On no, change nothing.
+
+### 7. Confirm
+
+Tell the user the rule was written, and the task tools setting if step 6 changed it, and that both apply to new sessions. Re-running this skill updates them.
+
+### 8. Offer a verification skill (optional)
 
 Check whether the project has a way to drive the real app for proof (a `verify-*` skill, or an existing harness). If not, offer once: "want a project-local verification skill, so agents can drive the app the way a user does and prove changes work? I can generate one with /pstack:create-verification-skill." On yes, run the **create-verification-skill** skill. On no, move on without pushing.
 
-### 8. Offer a formal verification skill (optional)
+### 9. Offer a formal verification skill (optional)
 
 Check whether the project already has a formal verification skill (a project skill that runs a model checker, a proof, or another verifier against the code). If not, offer once: "want a formal verification skill, so agents can prove a key property of your code holds in every case in scope, not only the cases tests reach? I can generate one with /pstack:create-formal-verification-skill." On yes, run the **create-formal-verification-skill** skill. On no, move on without pushing.

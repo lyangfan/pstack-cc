@@ -8,7 +8,7 @@ when_to_use: "Only when the user asks for this skill by name, or a running pstac
 
 ## Start
 
-Open a todo list with one entry per phase before launching anything.
+Track one item per phase before launching anything. If `TaskCreate` is in your tools or the deferred tool list, load it with `ToolSearch`, create one task per phase, and set each `completed` as its phase finishes. Otherwise name the current phase in each status line and end the final reply with the phases as a checklist, each marked `[x]` done or `skip: <reason>`.
 
 1. Frame
 2. Fan out

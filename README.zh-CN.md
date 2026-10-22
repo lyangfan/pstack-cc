@@ -127,7 +127,7 @@ morning.
 
 调用后，它会：
 
-1. 把你的任务匹配到一个 [playbook](./skills/poteto-mode/playbooks/)，并在第一行状态里写出它的名字。最终回复以一份 checklist 结尾：原样列出这个 playbook 的步骤，每一步都标明已完成，或者写明 `skip: <原因>`。
+1. 把你的任务匹配到一个 [playbook](./skills/poteto-mode/playbooks/)，并在第一行状态里写出它的名字。如果开启了 Claude Code 的 task 工具（`/setup-pstack` 会询问是否开启），每一步都会成为一个可以实时查看的 task。最终回复以一份 checklist 结尾：原样列出这个 playbook 的步骤，每一步都标明已完成，或者写明 `skip: <原因>`。
 2. 在各步骤需要时调用其他 skill。
 3. 回复去掉 AI 腔，并从使用者和维护者两个角度来写。
 

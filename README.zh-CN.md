@@ -61,36 +61,36 @@ claude plugin update pstack@pstack-cc
 
 **卸载**：`claude plugin uninstall pstack@pstack-cc`。
 
-Claude Code 会给插件的命令和 agent 加上前缀，所以 `/poteto-mode` 实际是 `/pstack:poteto-mode`，子代理是 `pstack:poteto-agent`。没有其他插件占用同名命令时，不带前缀的 `/poteto-mode` 也能用。本文统一写不带前缀的名字。
+Claude Code 会给插件的命令和 agent 加上插件名前缀，所以命令要输入 `/pstack:poteto-mode`，子代理是 `pstack:poteto-agent`。不带前缀的 `/poteto-mode` 会报 `Unknown command`。不想输入前缀的话，可以先输入 `/poteto`，再从补全菜单里选。
 
 ## 开始使用
 
 两步：
 
-1. 运行 [`/setup-pstack`](./skills/setup-pstack/SKILL.md)，选一个 effort 预算，再选每个角色用哪个模型。
-2. 做任何需要严谨的事情时，使用 [`/poteto-mode`](./skills/poteto-mode/SKILL.md)。
+1. 运行 [`/pstack:setup-pstack`](./skills/setup-pstack/SKILL.md)，选一个 effort 预算，再选每个角色用哪个模型。
+2. 做任何需要严谨的事情时，使用 [`/pstack:poteto-mode`](./skills/poteto-mode/SKILL.md)。
 
-第一次用？[pstack 指南](./docs/guide/README.md)（英文）会带你完成第一个真实任务，从安装、写提示词，一直到验证和通宵运行。卡住了，或者不确定该用哪个 skill？问 [`/poteto-help`](./skills/poteto-help/SKILL.md)。
+第一次用？[pstack 指南](./docs/guide/README.md)（英文）会带你完成第一个真实任务，从安装、写提示词，一直到验证和通宵运行。卡住了，或者不确定该用哪个 skill？问 [`/pstack:poteto-help`](./skills/poteto-help/SKILL.md)。
 
-就这么简单。其他 skill 都是按需使用的，mode skill 会在需要时替你调用。默认按模型的长处分工：写代码的委派任务（feature、refactoring、bug fix、perf、hillclimb）交给 `sonnet xhigh`，最难的改动、写作和需要判断的工作交给 `opus xhigh`。默认的评审面板是 `opus xhigh` 加 `sonnet xhigh`。这些都可以用 [`/setup-pstack`](./skills/setup-pstack/SKILL.md) 修改。
+就这么简单。其他 skill 都是按需使用的，mode skill 会在需要时替你调用。默认按模型的长处分工：写代码的委派任务（feature、refactoring、bug fix、perf、hillclimb）交给 `sonnet xhigh`，最难的改动、写作和需要判断的工作交给 `opus xhigh`。默认的评审面板是 `opus xhigh` 加 `sonnet xhigh`。这些都可以用 [`/pstack:setup-pstack`](./skills/setup-pstack/SKILL.md) 修改。
 
 ## 用法
 
-在任务开始时使用 [`/poteto-mode`](./skills/poteto-mode/SKILL.md)。它读你的请求，从一组 playbook 里挑一个，然后在各步骤需要时调用其他 skill。
+在任务开始时使用 [`/pstack:poteto-mode`](./skills/poteto-mode/SKILL.md)。它读你的请求，从一组 playbook 里挑一个，然后在各步骤需要时调用其他 skill。
 
-输入 `/poteto-mode`，后面直接跟上你的任务，Claude Code 会把 skill 和这条消息一起加载。
+输入 `/pstack:poteto-mode`，后面直接跟上你的任务，Claude Code 会把 skill 和这条消息一起加载。
 
-### 用 [`/poteto-mode`](./skills/poteto-mode/SKILL.md) 就够了
+### 用 [`/pstack:poteto-mode`](./skills/poteto-mode/SKILL.md) 就够了
 
 这个 skill 是主入口。只要你需要 agent 做严谨的工程工作，就用它。它自带二十三个 playbook：
 
 ```
-/poteto-mode this pr has a subtle bug where the scroll drifts every 750ms even when idle. repro
+/pstack:poteto-mode this pr has a subtle bug where the scroll drifts every 750ms even when idle. repro
 first, then fix and verify.
 ```
 
 ```
-/poteto-mode i'm going to bed. land the stack even if ci flakes. i want everything merged by
+/pstack:poteto-mode i'm going to bed. land the stack even if ci flakes. i want everything merged by
 morning.
 ```
 
@@ -127,7 +127,7 @@ morning.
 
 调用后，它会：
 
-1. 把你的任务匹配到一个 [playbook](./skills/poteto-mode/playbooks/)，并在第一行状态里写出它的名字。如果开启了 Claude Code 的 task 工具（`/setup-pstack` 会询问是否开启），每一步都会成为一个可以实时查看的 task。最终回复以一份 checklist 结尾：原样列出这个 playbook 的步骤，每一步都标明已完成，或者写明 `skip: <原因>`。
+1. 把你的任务匹配到一个 [playbook](./skills/poteto-mode/playbooks/)，并在第一行状态里写出它的名字。如果开启了 Claude Code 的 task 工具（`/pstack:setup-pstack` 会询问是否开启），每一步都会成为一个可以实时查看的 task。最终回复以一份 checklist 结尾：原样列出这个 playbook 的步骤，每一步都标明已完成，或者写明 `skip: <原因>`。
 2. 在各步骤需要时调用其他 skill。
 3. 回复去掉 AI 腔，并从使用者和维护者两个角度来写。
 
@@ -151,7 +151,7 @@ alias claude-poteto="claude --settings '{\"outputStyle\":\"pstack:poteto\"}'"
 
 之后运行 `claude-poteto` 启动的 session 会开启这个模式，直接运行 `claude` 则不开启。
 
-**已经在一个 session 里了？** Claude Code 没有"只对当前 session 生效"的开关。`/output-style` 会把设置保存到项目里，这个项目之后的 session 也都会开启。如果只想在当前 session 里用，就每个任务输入一次 `/poteto-mode <任务>`，它在 `/compact` 或 `/clear` 之前一直有效。
+**已经在一个 session 里了？** Claude Code 没有"只对当前 session 生效"的开关。`/output-style` 会把设置保存到项目里，这个项目之后的 session 也都会开启。如果只想在当前 session 里用，就每个任务输入一次 `/pstack:poteto-mode <任务>`，它在 `/compact` 或 `/clear` 之前一直有效。
 
 **想在更多 session 里开启？**
 
@@ -161,20 +161,20 @@ alias claude-poteto="claude --settings '{\"outputStyle\":\"pstack:poteto\"}'"
 | 这个项目的所有 session | 在 session 里运行 `/output-style pstack:poteto` | 写入项目里的 `.claude/settings.local.json`，这是你本机的个人设置，通常不会提交到 git。用 `/output-style default` 撤销 |
 | 所有项目 | 在 `~/.claude/settings.json` 里设置 `"outputStyle": "pstack:poteto"` | 你的用户设置。项目自己的设置优先于它 |
 
-[`/poteto-mode`](./skills/poteto-mode/SKILL.md) 和 Claude Code 的 `/loop` 命令配合得非常好，可以让 Claude Code 连续工作好几个小时，同时不失严谨。
+[`/pstack:poteto-mode`](./skills/poteto-mode/SKILL.md) 和 Claude Code 的 `/loop` 命令配合得非常好，可以让 Claude Code 连续工作好几个小时，同时不失严谨。
 
-也可以在 headless 模式下运行（`claude -p "/poteto-mode ..."`）。使用 `--output-format stream-json` 时，主回合每结束一次，事件流就会发出一个 `result` 事件，即使后台子代理还在运行也是如此，所以一次运行可能发出好几个。进程退出才代表运行结束，最后一个 `result` 里才是最终回复。
+也可以在 headless 模式下运行（`claude -p "/pstack:poteto-mode ..."`）。使用 `--output-format stream-json` 时，主回合每结束一次，事件流就会发出一个 `result` 事件，即使后台子代理还在运行也是如此，所以一次运行可能发出好几个。进程退出才代表运行结束，最后一个 `result` 里才是最终回复。
 
 ## skills
 
-[`/poteto-mode`](./skills/poteto-mode/SKILL.md) 会在步骤需要时替你调用其中大部分（`how`、`why`、`architect`、`arena`、`swarm`、`interrogate`、`unslop`、`no-comments`、`technical-writing`、`tdd`，以及各条原则）。`automate-me`、`blast-radius`、`correct`、`in-your-own-words`、`poteto-help`、`recall`、`reflect`、`setup-pstack`、`sharpen` 和 `teach` 只在你手动输入时运行。下表供你需要直接使用某个 skill 时参考：
+[`/pstack:poteto-mode`](./skills/poteto-mode/SKILL.md) 会在步骤需要时替你调用其中大部分（`how`、`why`、`architect`、`arena`、`swarm`、`interrogate`、`unslop`、`no-comments`、`technical-writing`、`tdd`，以及各条原则）。`automate-me`、`blast-radius`、`correct`、`in-your-own-words`、`poteto-help`、`recall`、`reflect`、`setup-pstack`、`sharpen` 和 `teach` 只在你手动输入时运行。下表供你需要直接使用某个 skill 时参考：
 
 ```
-/how do we cancel runs? do we have an n+1 when we look up every run to cancel?
+/pstack:how do we cancel runs? do we have an n+1 when we look up every run to cancel?
 ```
 
 ```
-/interrogate review this pr.
+/pstack:interrogate review this pr.
 ```
 
 <details>
@@ -182,82 +182,82 @@ alias claude-poteto="claude --settings '{\"outputStyle\":\"pstack:poteto\"}'"
 
 | skill | 适用场景 |
 |---|---|
-| [`/poteto-mode`](./skills/poteto-mode/SKILL.md) | 任何不简单的任务的默认入口。 |
-| [`/poteto-help`](./skills/poteto-help/SKILL.md) | 你刚接触 pstack，或者不确定该用哪个 skill、playbook 或原则。它先弄清你想做什么，回答相关的部分，再给你一条可以直接输入的提示词。只在你输入 `/poteto-help` 时运行。 |
-| [`/in-your-own-words`](./skills/in-your-own-words/SKILL.md) | 你希望 agent 开始之前先复述你的目标和问题。只在你输入 `/in-your-own-words` 时运行。 |
-| [`/sharpen`](./skills/sharpen/SKILL.md) | 发出提示词之前，你想让它更有深度，而不是更长：顶尖的专业人士会做哪些你没要求的事，会从什么原始材料入手，用什么方法和工具，以及用什么外部检查确认结果正确。它交回改写后的提示词，你的选择保持开放，它本身不执行任务。只在你输入 `/sharpen` 时运行。 |
-| [`/how`](./skills/how/SKILL.md) | 你想了解某个子系统是怎么工作的。 |
-| [`/why`](./skills/why/SKILL.md) | 你想知道某样东西为什么是这样设计的。它在运行时发现可用的 MCP，并行查询各类证据来源（版本控制、问题跟踪、长文档、即时聊天、基础设施监控、错误追踪、数据仓库）。 |
-| [`/recall`](./skills/recall/SKILL.md) | 你要开始或继续一项工作，想从自己的聊天记录和共享记录里重建某个主题最近的上下文，并得到一份精炼的现状简报。 |
-| [`/ketchup`](./skills/ketchup/SKILL.md) | 你想知道自从你上一条消息之后这个会话里发生了什么，用通俗的语言和简单的图示说明，并列出每一件等你决定的事，而且只看这条回复就能做决定，哪怕因此回复会很长。 |
-| [`/blast-radius`](./skills/blast-radius/SKILL.md) | 你有一个看起来很小的改动，想知道它还可能弄坏什么，并且用运行代码来证明"它为什么安全"的那个关键事实，而不是空口断言。 |
-| [`/architect`](./skills/architect/SKILL.md) | 你要写的代码会跨越函数边界，想先确定调用方的用法、类型和模块结构。 |
-| [`/arena`](./skills/arena/SKILL.md) | 你想让 N 个 agent 并行尝试同一件事，再取各自最好的部分。 |
-| [`/swarm`](./skills/swarm/SKILL.md) | 你想让 N 个 worker 并行处理不同的部分或互相竞速，最后汇总成一份报告。 |
-| [`/interrogate`](./skills/interrogate/SKILL.md) | 你有一份 diff，想让不同的模型尝试把它挑出毛病，包括一个严格的代码质量视角。 |
-| [`/automate-me`](./skills/automate-me/SKILL.md) | 你想根据自己实际的工作方式，起草一个属于你的 `-mode` skill。 |
-| [`/setup-pstack`](./skills/setup-pstack/SKILL.md) | 你想为每个角色选择 pstack 使用的模型。它读取 `Agent` 工具接受的模型，写入 `~/.claude/rules/pstack-models.md`。 |
-| [`/reflect`](./skills/reflect/SKILL.md) | 一个长任务完成了，你想把这次的经验沉淀为对某个 skill 的修改。 |
-| [`/correct`](./skills/correct/SKILL.md) | 你总是因为同样的错误纠正 agent。它从历史记录里归纳出错误的类型，在能起作用的最高层级逐一修复（先是架构，然后是类型、lint 和 CI，再是测试，最后才是文档），并维护一张表，把每条规则和执行它的机制对应起来。 |
-| [`/teach`](./skills/teach/SKILL.md) | 你想真正理解一个改动或子系统，而不只是看个摘要。它运行 how 和 why，编织成一份通俗的讲解，用一张张图逐步展开。 |
-| [`/tdd`](./skills/tdd/SKILL.md) | 你在修 bug，并且有一条低成本的本地测试路径。先写会失败的测试，再修复。 |
-| [`/benchmark-checklist`](./skills/benchmark-checklist/SKILL.md) | 你跑了 benchmark，或者测出了一次提速或退化。在你报告或据此行动之前，先审核这个数字（瓶颈在哪、调优、误差、重复测量、对端到端是否有意义）。 |
-| [`/no-comments`](./skills/no-comments/SKILL.md) | 评审前清理注释。它派出 Comment Sicko，修复被采纳的问题，并为注释里声称的约束提供可以落成代码的方案。 |
-| [`/typescript-best-practices`](./skills/typescript-best-practices/SKILL.md) | 你在读或改 TypeScript。它把"类型系统纪律"这条原则落实到具体语法。 |
-| [`/figure-it-out`](./skills/figure-it-out/SKILL.md) | 没有合适的现成 playbook。它为这个任务设计一份严谨、可审计的 playbook。 |
-| [`/show-me-your-work`](./skills/show-me-your-work/SKILL.md) | 你想要一份可以审阅的决策记录。它把决策写进一个可以提交的 TSV 文件。 |
-| [`/create-verification-skill`](./skills/create-verification-skill/SKILL.md) | 你的项目没有用脚本证明应用行为的方法。它为任何语言或平台生成一个项目内的验证 skill，附带功能地图。 |
-| [`/maintain-verification-skill`](./skills/maintain-verification-skill/SKILL.md) | 验证 skill 的功能地图已经和应用对不上了。先读一遍源码，再实际运行一遍，最多提交一个包含已证实修正的 PR。 |
-| [`/create-formal-verification-skill`](./skills/create-formal-verification-skill/SKILL.md) | 测试覆盖不到会让竞态、重试、状态机、解析器或 unsafe 代码出错的情况。它用合适的工具验证一条性质，并生成一个项目内的 skill，每次改动后都重新检查。 |
-| [`/maintain-formal-verification-skill`](./skills/maintain-formal-verification-skill/SKILL.md) | 形式化验证覆盖的代码自上次检查后有了改动。它更新模型、验证框架或性质以匹配代码，重新运行，并指出每个失败是验证本身过时了，还是代码里真有 bug。 |
-| [`/unslop`](./skills/unslop/SKILL.md) | 你在润色文字。去掉 AI 腔。 |
-| [`/bro`](./skills/bro/SKILL.md) | 你想把上一条消息用通俗的人话重说一遍，不要术语。 |
-| [`/technical-writing`](./skills/technical-writing/SKILL.md) | 分层的写作规范（Diátaxis、Google 开发者文档风格、STE、Global English），用于文档、RFC、README、PR 描述和提交信息。 |
+| [`/pstack:poteto-mode`](./skills/poteto-mode/SKILL.md) | 任何不简单的任务的默认入口。 |
+| [`/pstack:poteto-help`](./skills/poteto-help/SKILL.md) | 你刚接触 pstack，或者不确定该用哪个 skill、playbook 或原则。它先弄清你想做什么，回答相关的部分，再给你一条可以直接输入的提示词。只在你输入 `/pstack:poteto-help` 时运行。 |
+| [`/pstack:in-your-own-words`](./skills/in-your-own-words/SKILL.md) | 你希望 agent 开始之前先复述你的目标和问题。只在你输入 `/pstack:in-your-own-words` 时运行。 |
+| [`/pstack:sharpen`](./skills/sharpen/SKILL.md) | 发出提示词之前，你想让它更有深度，而不是更长：顶尖的专业人士会做哪些你没要求的事，会从什么原始材料入手，用什么方法和工具，以及用什么外部检查确认结果正确。它交回改写后的提示词，你的选择保持开放，它本身不执行任务。只在你输入 `/pstack:sharpen` 时运行。 |
+| [`/pstack:how`](./skills/how/SKILL.md) | 你想了解某个子系统是怎么工作的。 |
+| [`/pstack:why`](./skills/why/SKILL.md) | 你想知道某样东西为什么是这样设计的。它在运行时发现可用的 MCP，并行查询各类证据来源（版本控制、问题跟踪、长文档、即时聊天、基础设施监控、错误追踪、数据仓库）。 |
+| [`/pstack:recall`](./skills/recall/SKILL.md) | 你要开始或继续一项工作，想从自己的聊天记录和共享记录里重建某个主题最近的上下文，并得到一份精炼的现状简报。 |
+| [`/pstack:ketchup`](./skills/ketchup/SKILL.md) | 你想知道自从你上一条消息之后这个会话里发生了什么，用通俗的语言和简单的图示说明，并列出每一件等你决定的事，而且只看这条回复就能做决定，哪怕因此回复会很长。 |
+| [`/pstack:blast-radius`](./skills/blast-radius/SKILL.md) | 你有一个看起来很小的改动，想知道它还可能弄坏什么，并且用运行代码来证明"它为什么安全"的那个关键事实，而不是空口断言。 |
+| [`/pstack:architect`](./skills/architect/SKILL.md) | 你要写的代码会跨越函数边界，想先确定调用方的用法、类型和模块结构。 |
+| [`/pstack:arena`](./skills/arena/SKILL.md) | 你想让 N 个 agent 并行尝试同一件事，再取各自最好的部分。 |
+| [`/pstack:swarm`](./skills/swarm/SKILL.md) | 你想让 N 个 worker 并行处理不同的部分或互相竞速，最后汇总成一份报告。 |
+| [`/pstack:interrogate`](./skills/interrogate/SKILL.md) | 你有一份 diff，想让不同的模型尝试把它挑出毛病，包括一个严格的代码质量视角。 |
+| [`/pstack:automate-me`](./skills/automate-me/SKILL.md) | 你想根据自己实际的工作方式，起草一个属于你的 `-mode` skill。 |
+| [`/pstack:setup-pstack`](./skills/setup-pstack/SKILL.md) | 你想为每个角色选择 pstack 使用的模型。它读取 `Agent` 工具接受的模型，写入 `~/.claude/rules/pstack-models.md`。 |
+| [`/pstack:reflect`](./skills/reflect/SKILL.md) | 一个长任务完成了，你想把这次的经验沉淀为对某个 skill 的修改。 |
+| [`/pstack:correct`](./skills/correct/SKILL.md) | 你总是因为同样的错误纠正 agent。它从历史记录里归纳出错误的类型，在能起作用的最高层级逐一修复（先是架构，然后是类型、lint 和 CI，再是测试，最后才是文档），并维护一张表，把每条规则和执行它的机制对应起来。 |
+| [`/pstack:teach`](./skills/teach/SKILL.md) | 你想真正理解一个改动或子系统，而不只是看个摘要。它运行 how 和 why，编织成一份通俗的讲解，用一张张图逐步展开。 |
+| [`/pstack:tdd`](./skills/tdd/SKILL.md) | 你在修 bug，并且有一条低成本的本地测试路径。先写会失败的测试，再修复。 |
+| [`/pstack:benchmark-checklist`](./skills/benchmark-checklist/SKILL.md) | 你跑了 benchmark，或者测出了一次提速或退化。在你报告或据此行动之前，先审核这个数字（瓶颈在哪、调优、误差、重复测量、对端到端是否有意义）。 |
+| [`/pstack:no-comments`](./skills/no-comments/SKILL.md) | 评审前清理注释。它派出 Comment Sicko，修复被采纳的问题，并为注释里声称的约束提供可以落成代码的方案。 |
+| [`/pstack:typescript-best-practices`](./skills/typescript-best-practices/SKILL.md) | 你在读或改 TypeScript。它把"类型系统纪律"这条原则落实到具体语法。 |
+| [`/pstack:figure-it-out`](./skills/figure-it-out/SKILL.md) | 没有合适的现成 playbook。它为这个任务设计一份严谨、可审计的 playbook。 |
+| [`/pstack:show-me-your-work`](./skills/show-me-your-work/SKILL.md) | 你想要一份可以审阅的决策记录。它把决策写进一个可以提交的 TSV 文件。 |
+| [`/pstack:create-verification-skill`](./skills/create-verification-skill/SKILL.md) | 你的项目没有用脚本证明应用行为的方法。它为任何语言或平台生成一个项目内的验证 skill，附带功能地图。 |
+| [`/pstack:maintain-verification-skill`](./skills/maintain-verification-skill/SKILL.md) | 验证 skill 的功能地图已经和应用对不上了。先读一遍源码，再实际运行一遍，最多提交一个包含已证实修正的 PR。 |
+| [`/pstack:create-formal-verification-skill`](./skills/create-formal-verification-skill/SKILL.md) | 测试覆盖不到会让竞态、重试、状态机、解析器或 unsafe 代码出错的情况。它用合适的工具验证一条性质，并生成一个项目内的 skill，每次改动后都重新检查。 |
+| [`/pstack:maintain-formal-verification-skill`](./skills/maintain-formal-verification-skill/SKILL.md) | 形式化验证覆盖的代码自上次检查后有了改动。它更新模型、验证框架或性质以匹配代码，重新运行，并指出每个失败是验证本身过时了，还是代码里真有 bug。 |
+| [`/pstack:unslop`](./skills/unslop/SKILL.md) | 你在润色文字。去掉 AI 腔。 |
+| [`/pstack:bro`](./skills/bro/SKILL.md) | 你想把上一条消息用通俗的人话重说一遍，不要术语。 |
+| [`/pstack:technical-writing`](./skills/technical-writing/SKILL.md) | 分层的写作规范（Diátaxis、Google 开发者文档风格、STE、Global English），用于文档、RFC、README、PR 描述和提交信息。 |
 
 </details>
 
 ### 示例
 
-大多数时候，在任务开始时输入 [`/poteto-mode`](./skills/poteto-mode/SKILL.md)，让它自己选 playbook 就行，其他 skill 会在步骤需要时自动调用。也有几个值得直接调用。
+大多数时候，在任务开始时输入 [`/pstack:poteto-mode`](./skills/poteto-mode/SKILL.md)，让它自己选 playbook 就行，其他 skill 会在步骤需要时自动调用。也有几个值得直接调用。
 
 <details>
 <summary>全部示例</summary>
 
 ```
-bug fix:           /poteto-mode this pr has a subtle bug where the scroll drifts every 750ms even
+bug fix:           /pstack:poteto-mode this pr has a subtle bug where the scroll drifts every 750ms even
                    when idle. repro first, then fix and verify.
-perf:              /poteto-mode a big list takes a second or two to load even though we virtualize.
+perf:              /pstack:poteto-mode a big list takes a second or two to load even though we virtualize.
                    run a cpu trace and tell me why.
-feature:           /poteto-mode build a small feature behind a feature flag. verify it really works.
-prototype:         /poteto-mode build two prototypes of the markdown renderer so we can compare.
+feature:           /pstack:poteto-mode build a small feature behind a feature flag. verify it really works.
+prototype:         /pstack:poteto-mode build two prototypes of the markdown renderer so we can compare.
                    spawn an agent for each.
-multi-phase:       /poteto-mode open source these skills as a plugin. nothing internal leaks, work
+multi-phase:       /pstack:poteto-mode open source these skills as a plugin. nothing internal leaks, work
                    in a temp dir, show me the dependency graph first.
-overnight run:     /poteto-mode i'm going to bed. land the stack even if ci flakes. i want
+overnight run:     /pstack:poteto-mode i'm going to bed. land the stack even if ci flakes. i want
                    everything merged by morning.
-babysit:           /poteto-mode check on pr 123. anything outstanding?
-visual parity:     /poteto-mode the row spacing is too tall when this flag is on. the second image
+babysit:           /pstack:poteto-mode check on pr 123. anything outstanding?
+visual parity:     /pstack:poteto-mode the row spacing is too tall when this flag is on. the second image
                    is correct. repro and fix until it matches.
-figure it out:     /poteto-mode i'm stepping away. migrate every caller from the synchronous store
+figure it out:     /pstack:poteto-mode i'm stepping away. migrate every caller from the synchronous store
                    to the new async one, keeping behavior identical. i want to trust it was done
                    right when i'm back.
-how:               /how do we cancel runs? do we have an n+1 when we look up every run to cancel?
-why:               /why is this feature flag not on yet?
-architect:         design this instrumentation to be high signal with no false positives. /architect
+how:               /pstack:how do we cancel runs? do we have an n+1 when we look up every run to cancel?
+why:               /pstack:why is this feature flag not on yet?
+architect:         design this instrumentation to be high signal with no false positives. /pstack:architect
                    this first.
-arena:             /arena take my prompt to the arena verbatim. i want to compare their proposals
+arena:             /pstack:arena take my prompt to the arena verbatim. i want to compare their proposals
                    with yours.
-swarm:             /swarm check every package under packages/ against its check.sh. one worker per
+swarm:             /pstack:swarm check every package under packages/ against its check.sh. one worker per
                    package. one report.
-interrogate:       /interrogate review this pr.
-tdd:               /tdd implement
+interrogate:       /pstack:interrogate review this pr.
+tdd:               /pstack:tdd implement
 unslop:            can we unslop and tighten the new changes?
-reflect:           /reflect that took too long. capture what we learned so the next run doesn't
+reflect:           /pstack:reflect that took too long. capture what we learned so the next run doesn't
                    repeat it.
-correct:           /correct
-show-me-your-work: /show-me-your-work keep a decision trail i can review when i'm back.
-automate-me:       /automate-me
-help:              /poteto-help which skill should i use to review this branch?
+correct:           /pstack:correct
+show-me-your-work: /pstack:show-me-your-work keep a decision trail i can review when i'm back.
+automate-me:       /pstack:automate-me
+help:              /pstack:poteto-help which skill should i use to review this branch?
 ```
 
 提示词也可以直接用中文写。
@@ -266,13 +266,13 @@ help:              /poteto-help which skill should i use to review this branch?
 
 ## 子代理
 
-[`/poteto-mode`](./skills/poteto-mode/SKILL.md) 在收到它的那个会话里运行。这个会话负责 playbook、checklist，以及所有子代理的派发。
+[`/pstack:poteto-mode`](./skills/poteto-mode/SKILL.md) 在收到它的那个会话里运行。这个会话负责 playbook、checklist，以及所有子代理的派发。
 
 pstack 还提供 [`subagent_type: "pstack:poteto-agent"`](./agents/poteto-agent.md)，作为运行过程中派出的委派代理的封装。它通过 agent 定义里的 `skills` 字段预加载 `poteto-mode`，包括其中内嵌的原则索引。换成 `general-purpose` 就会跳过这一步，行为也会偏离。不要派 `pstack:poteto-agent` 来执行 playbook 本身。
 
 [`pstack:readonly`](./agents/readonly.md) 是只读子代理，评审员、裁判、探索者和调查者都以它的身份运行。它没有编辑工具，但保留会话里的 MCP 工具。
 
-pstack 还提供 [Comment Sicko](./agents/comment-sicko.md)，一个专门清理注释的代理，以 `subagent_type: "pstack:comment-sicko"` 调用。它删除注释、标出需要重构的代码，但从不编写应用代码。通常通过 [`/no-comments`](./skills/no-comments/SKILL.md) 调用，而不是直接调用。
+pstack 还提供 [Comment Sicko](./agents/comment-sicko.md)，一个专门清理注释的代理，以 `subagent_type: "pstack:comment-sicko"` 调用。它删除注释、标出需要重构的代码，但从不编写应用代码。通常通过 [`/pstack:no-comments`](./skills/no-comments/SKILL.md) 调用，而不是直接调用。
 
 ## 原则
 
@@ -320,17 +320,17 @@ pstack 还提供 [Comment Sicko](./agents/comment-sicko.md)，一个专门清理
 
 ## 为什么没有规划类的 skill？
 
-Claude Code 本身就有 plan mode（Shift+Tab），和 pstack 配合得很好。原作者的观点是：最好的规格说明就是代码，所以规划不是默认步骤。如果你确实想做计划，[`/poteto-mode`](./skills/poteto-mode/SKILL.md) 也支持，只是不作为默认。
+Claude Code 本身就有 plan mode（Shift+Tab），和 pstack 配合得很好。原作者的观点是：最好的规格说明就是代码，所以规划不是默认步骤。如果你确实想做计划，[`/pstack:poteto-mode`](./skills/poteto-mode/SKILL.md) 也支持，只是不作为默认。
 
 ## 打造你自己的版本
 
 `poteto-mode` 是 poteto 的风格，你未必完全想要这样。
 
-输入 [`/automate-me`](./skills/automate-me/SKILL.md)。它会挖掘你最近的会话记录，根据你实际的工作方式起草一个 `<你的名字>-mode` skill，底层仍然通过 pstack 运行。这样你保留 pstack 作为基础，同时在 `poteto-mode` 之外拥有自己的路由 skill。
+输入 [`/pstack:automate-me`](./skills/automate-me/SKILL.md)。它会挖掘你最近的会话记录，根据你实际的工作方式起草一个 `<你的名字>-mode` skill，底层仍然通过 pstack 运行。这样你保留 pstack 作为基础，同时在 `poteto-mode` 之外拥有自己的路由 skill。
 
-模型也可以配置。输入 [`/setup-pstack`](./skills/setup-pstack/SKILL.md)。它读取 `Agent` 工具接受的模型，写入 `~/.claude/rules/pstack-models.md`。这是一条 Claude Code 会加载到每个 session 的用户规则，把每个角色（写代码、判断、各个评审面板）对应到一个模型和 effort。每个 skill 都会读取它；没有这个文件时，就回退到合理的默认值，所以你只需要覆盖想改的部分。
+模型也可以配置。输入 [`/pstack:setup-pstack`](./skills/setup-pstack/SKILL.md)。它读取 `Agent` 工具接受的模型，写入 `~/.claude/rules/pstack-models.md`。这是一条 Claude Code 会加载到每个 session 的用户规则，把每个角色（写代码、判断、各个评审面板）对应到一个模型和 effort。每个 skill 都会读取它；没有这个文件时，就回退到合理的默认值，所以你只需要覆盖想改的部分。
 
-默认值变化后，之前写下的规则仍会锁定旧的默认值。删掉那几行角色设置，或者删掉整个文件，再重新运行 `/setup-pstack`。重新运行时，模型和默认值不同的角色都会被保留。
+默认值变化后，之前写下的规则仍会锁定旧的默认值。删掉那几行角色设置，或者删掉整个文件，再重新运行 `/pstack:setup-pstack`。重新运行时，模型和默认值不同的角色都会被保留。
 
 ## 移植说明
 
